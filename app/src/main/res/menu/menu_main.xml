@@ -1,0 +1,14 @@
+<menu xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools" tools:context=".MainActivity">
+    <item android:id="@+id/action_load" android:title="Load"
+        android:orderInCategory="100" app:showAsAction="never" />
+    <item android:id="@+id/action_all" android:title="Select all"
+        android:orderInCategory="100" app:showAsAction="never" />
+    <item android:id="@+id/action_visible" android:title="Select visible"
+        android:orderInCategory="100" app:showAsAction="never" />
+    <item android:id="@+id/action_hd" android:title="Select HD"
+        android:orderInCategory="100" app:showAsAction="never" />
+    <item android:id="@+id/action_vip" android:title="Select VIP"
+        android:orderInCategory="100" app:showAsAction="never" />
+</menu>
