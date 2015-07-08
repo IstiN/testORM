@@ -11,4 +11,6 @@
         android:orderInCategory="100" app:showAsAction="never" />
     <item android:id="@+id/action_vip" android:title="Select VIP"
         android:orderInCategory="100" app:showAsAction="never" />
+    <item android:id="@+id/action_live" android:title="Select LIVE"
+        android:orderInCategory="100" app:showAsAction="never" />
 </menu>

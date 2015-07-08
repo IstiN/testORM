@@ -5,6 +5,7 @@ import android.text.TextUtils;
 
 import com.epam.testorm.gson.Channel;
 import com.epam.testorm.gson.Images;
+import com.epam.testorm.gson.Params;
 import com.epam.testorm.gson.Responce;
 import com.epam.testorm.gson.Station;
 import com.epam.testorm.gson.VideoStream;
@@ -48,7 +49,8 @@ public class RealmCache {
         channel.setLanguageCode(item.getLanguageCode());
         channel.setVisible(item.isVisible());
 
-        Station station = item.getStationSchedules().get(0);
+        Params params = item.getStationSchedules().get(0);
+        Station station = params.getStation();
         RealmStation realmStation = realm.createObject(RealmStation.class);
 
         realmStation.setId(station.getId());
@@ -101,15 +103,23 @@ public class RealmCache {
         return realm.where(RealmChannel.class).findAll();
     }
 
-    public List<RealmChannel> getVisibleChannels() {
-        return null;
+    public RealmResults<RealmChannel> getVisibleChannels() {
+        Realm realm = Realm.getDefaultInstance();
+        return realm.where(RealmChannel.class).equalTo("visible", true).findAll();
     }
 
-    public List<RealmChannel> getHDChannels() {
-        return null;
+    public RealmResults<RealmChannel> getHDChannels() {
+        Realm realm = Realm.getDefaultInstance();
+        return realm.where(RealmChannel.class).equalTo("stationSchedules.isHd", true).findAll();
     }
 
-    public List<RealmChannel> getVIPChannels() {
-        return null;
+    public RealmResults<RealmChannel> getVIPChannels() {
+        Realm realm = Realm.getDefaultInstance();
+        return realm.where(RealmChannel.class).contains("stationSchedules.entitlements.value", "VIP").findAll();
+    }
+
+    public RealmResults<RealmChannel> getLiveChannels() {
+        Realm realm = Realm.getDefaultInstance();
+        return realm.where(RealmChannel.class).contains("stationSchedules.videoStreams.url", "http").findAll();
     }
 }

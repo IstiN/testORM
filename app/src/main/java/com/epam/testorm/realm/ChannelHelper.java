@@ -48,7 +48,11 @@ public class ChannelHelper {
     public static String getEntitlements(RealmChannel channel) {
         RealmStation stationSchedules = channel.getStationSchedules();
         RealmList<RealmEntitlement> entitlements = stationSchedules.getEntitlements();
-        String join = TextUtils.join(",", entitlements);
+        ArrayList<String> list = new ArrayList<>(entitlements.size());
+        for (RealmEntitlement item : entitlements) {
+            list.add(item.getValue());
+        }
+        String join = TextUtils.join(", ", list);
         return join;
     }
 }

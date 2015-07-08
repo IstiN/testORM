@@ -90,7 +90,7 @@ public class MainActivity extends ActionBarActivity {
         setText(convertView, R.id.number, String.valueOf(channel.getChannelNumber()));
         setText(convertView, R.id.desc, String.valueOf(channel.getStationSchedules().getDescription()));
         setText(convertView, R.id.title, String.valueOf(channel.getStationSchedules().getTitle()));
-        setText(convertView, R.id.hd, String.valueOf(channel.getStationSchedules().isHd() ? "HD": null));
+        setText(convertView, R.id.hd, channel.getStationSchedules().isHd() ? "HD": "");
         RealmVideoStream stream = ChannelHelper.getStream(channel);
         setText(convertView, R.id.videoUrl, String.valueOf(stream == null ? null : stream.getUrl()));
         setText(convertView, R.id.videoKey, String.valueOf(stream == null ? null : stream.getProtectionKey()));
@@ -132,25 +132,63 @@ public class MainActivity extends ActionBarActivity {
             return true;
         }
         if (id == R.id.action_vip) {
+            fetchVip();
             return true;
         }
         if (id == R.id.action_visible) {
+            fetchVisible();
             return true;
         }
         if (id == R.id.action_hd) {
+            fetchHD();
+            return true;
+        }
+        if (id == R.id.action_live) {
+            fetchLive();
             return true;
         }
 
         return super.onOptionsItemSelected(item);
     }
 
+    private void fetchHD() {
+        final long now = System.currentTimeMillis();
+        RealmResults<RealmChannel> allChannels = realm.getHDChannels();
+        final long time = System.currentTimeMillis() - now;
+        log("Read hd " + time + "ms, count = " + allChannels.size());
+        initAdapter(allChannels);
+    }
+
+    private void fetchLive() {
+        final long now = System.currentTimeMillis();
+        RealmResults<RealmChannel> allChannels = realm.getLiveChannels();
+        final long time = System.currentTimeMillis() - now;
+        log("Read live " + time + "ms, count = " + allChannels.size());
+        initAdapter(allChannels);
+    }
+
+    private void fetchVip() {
+        final long now = System.currentTimeMillis();
+        RealmResults<RealmChannel> allChannels = realm.getVIPChannels();
+        final long time = System.currentTimeMillis() - now;
+        log("Read vip " + time + "ms, count = " + allChannels.size());
+        initAdapter(allChannels);
+    }
+
+    private void fetchVisible() {
+        final long now = System.currentTimeMillis();
+        RealmResults<RealmChannel> allChannels = realm.getVisibleChannels();
+        final long time = System.currentTimeMillis() - now;
+        log("Read visible " + time + "ms, count = " + allChannels.size());
+        initAdapter(allChannels);
+    }
 
 
     private void fetchAll() {
         final long now = System.currentTimeMillis();
         RealmResults<RealmChannel> allChannels = realm.getAllChannels();
         final long time = System.currentTimeMillis() - now;
-        log("Read all" + time);
+        log("Read all " + time + "ms, count = " + allChannels.size());
         initAdapter(allChannels);
     }
 
