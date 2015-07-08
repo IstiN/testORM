@@ -15,12 +15,13 @@ public class Channel {
     private String languageCode;
     private long channelNumber;
     private boolean visible;
-    private ArrayList<Station> stationSchedules;
+
+    private ArrayList<Params> stationSchedules;
 
     public Channel() {
     }
 
-    public Channel(long id, String languageCode, long channelNumber, boolean visible, ArrayList<Station> stationSchedules) {
+    public Channel(long id, String languageCode, long channelNumber, boolean visible, ArrayList<Params> stationSchedules) {
         this.id = id;
         this.languageCode = languageCode;
         this.channelNumber = channelNumber;
@@ -60,11 +61,11 @@ public class Channel {
         this.visible = visible;
     }
 
-    public List<Station> getStationSchedules() {
+    public List<Params> getStationSchedules() {
         return stationSchedules;
     }
 
-    public void setStationSchedules(ArrayList<Station> stationSchedules) {
+    public void setStationSchedules(ArrayList<Params> stationSchedules) {
         this.stationSchedules = stationSchedules;
     }
 }
