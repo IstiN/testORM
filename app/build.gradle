@@ -17,6 +17,19 @@ android {
             proguardFiles getDefaultProguardFile('proguard-android.txt'), 'proguard-rules.pro'
         }
     }
+
+    flavorDimensions "orm"
+
+    productFlavors {
+        "REALM" {
+            flavorDimension "orm"
+            buildConfigField "String", "ORM", '"realm"';
+        }
+        "NATIVE" {
+            flavorDimension "orm"
+            buildConfigField "String", "ORM", '"sqlite"';
+        }
+    }
 }
 
 dependencies {

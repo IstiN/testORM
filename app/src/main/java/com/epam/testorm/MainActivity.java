@@ -3,19 +3,13 @@ package com.epam.testorm;
 import android.app.ProgressDialog;
 import android.os.Bundle;
 import android.support.v7.app.ActionBarActivity;
-import android.text.TextUtils;
 import android.view.Menu;
 import android.view.MenuItem;
-import android.view.View;
-import android.view.ViewGroup;
-import android.widget.ImageView;
+import android.widget.Adapter;
+import android.widget.ListAdapter;
 import android.widget.ListView;
 import android.widget.TextView;
 
-import com.epam.testorm.realm.ChannelHelper;
-import com.epam.testorm.realm.RealmCache;
-import com.epam.testorm.realm.RealmChannel;
-import com.epam.testorm.realm.RealmVideoStream;
 import com.nostra13.universalimageloader.core.DisplayImageOptions;
 import com.nostra13.universalimageloader.core.ImageLoader;
 import com.nostra13.universalimageloader.core.ImageLoaderConfiguration;
@@ -26,25 +20,20 @@ import java.io.InputStream;
 import java.net.HttpURLConnection;
 import java.net.URL;
 
-import io.realm.RealmBaseAdapter;
-import io.realm.RealmResults;
-
-import static com.epam.testorm.realm.ChannelHelper.getLogoUrl;
-
 
 public class MainActivity extends ActionBarActivity {
 
-    public static final String URL = "https://dl.dropboxusercontent.com/u/52289508/ORM/channels.json";
+    public static final String URL = "https://dl.dropboxusercontent.com/u/52289508/ORM/testOrm.json";
 
-    private RealmCache realm;
+    private ICacheManager cacheManager;
     private ListView listView;
-    private RealmBaseAdapter<RealmChannel> mAdapter;
+    private ListAdapter mAdapter;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
-        realm = new RealmCache(this);
+        cacheManager = CacheFactory.getManager(this);
         listView = (ListView) findViewById(R.id.list);
         final ImageLoaderConfiguration.Builder builder = new ImageLoaderConfiguration.Builder(
                 getApplicationContext()).defaultDisplayImageOptions(options);
@@ -64,49 +53,8 @@ public class MainActivity extends ActionBarActivity {
             .displayer(new SimpleBitmapDisplayer()) // default
             .build();
 
-    private void initAdapter(RealmResults<RealmChannel> channels) {
-        if (mAdapter == null) {
-            mAdapter = new RealmBaseAdapter<RealmChannel>(this, channels, false) {
-                @Override
-                public View getView(int position, View convertView, ViewGroup parent) {
-                    if (convertView == null) {
-                        convertView = inflater.inflate(R.layout.item,
-                                parent, false);
-                    }
-                    RealmChannel channel = realmResults.get(position);
-                    updateView(convertView, channel);
-                    return convertView;
-                }
-            };
-            listView.setAdapter(mAdapter);
-        } else {
-            mAdapter.updateRealmResults(channels);
-        }
-    }
 
-    private void updateView(View convertView, RealmChannel channel) {
-        ImageView logo = (ImageView) convertView.findViewById(R.id.logo);
-        ImageLoader.getInstance().displayImage(getLogoUrl(channel), logo);
-        setText(convertView, R.id.number, String.valueOf(channel.getChannelNumber()));
-        setText(convertView, R.id.desc, String.valueOf(channel.getStationSchedules().getDescription()));
-        setText(convertView, R.id.title, String.valueOf(channel.getStationSchedules().getTitle()));
-        setText(convertView, R.id.hd, channel.getStationSchedules().isHd() ? "HD": "");
-        RealmVideoStream stream = ChannelHelper.getStream(channel);
-        setText(convertView, R.id.videoUrl, String.valueOf(stream == null ? null : stream.getUrl()));
-        setText(convertView, R.id.videoKey, String.valueOf(stream == null ? null : stream.getProtectionKey()));
-        setText(convertView, R.id.entitlements, String.valueOf(ChannelHelper.getEntitlements(channel)));
 
-    }
-
-    private void setText(View view, int id, String value) {
-        TextView number = (TextView) view.findViewById(id);
-        if (!TextUtils.isEmpty(value)) {
-            number.setText(value);
-            number.setVisibility(View.VISIBLE);
-        } else {
-            number.setVisibility(View.GONE);
-        }
-    }
 
     @Override
     public boolean onCreateOptionsMenu(Menu menu) {
@@ -152,44 +100,44 @@ public class MainActivity extends ActionBarActivity {
     }
 
     private void fetchHD() {
-        final long now = System.currentTimeMillis();
-        RealmResults<RealmChannel> allChannels = realm.getHDChannels();
-        final long time = System.currentTimeMillis() - now;
-        log("Read hd " + time + "ms, count = " + allChannels.size());
-        initAdapter(allChannels);
+//        final long now = System.currentTimeMillis();
+//        RealmResults<RealmChannel> allChannels = cacheManager.getHDChannels();
+//        final long time = System.currentTimeMillis() - now;
+//        log("Read hd " + time + "ms, count = " + allChannels.size());
+//        initAdapter(allChannels);
     }
 
     private void fetchLive() {
-        final long now = System.currentTimeMillis();
-        RealmResults<RealmChannel> allChannels = realm.getLiveChannels();
-        final long time = System.currentTimeMillis() - now;
-        log("Read live " + time + "ms, count = " + allChannels.size());
-        initAdapter(allChannels);
+//        final long now = System.currentTimeMillis();
+//        RealmResults<RealmChannel> allChannels = cacheManager.getLiveChannels();
+//        final long time = System.currentTimeMillis() - now;
+//        log("Read live " + time + "ms, count = " + allChannels.size());
+//        initAdapter(allChannels);
     }
 
     private void fetchVip() {
-        final long now = System.currentTimeMillis();
-        RealmResults<RealmChannel> allChannels = realm.getVIPChannels();
-        final long time = System.currentTimeMillis() - now;
-        log("Read vip " + time + "ms, count = " + allChannels.size());
-        initAdapter(allChannels);
+//        final long now = System.currentTimeMillis();
+//        RealmResults<RealmChannel> allChannels = cacheManager.getVIPChannels();
+//        final long time = System.currentTimeMillis() - now;
+//        log("Read vip " + time + "ms, count = " + allChannels.size());
+//        initAdapter(allChannels);
     }
 
     private void fetchVisible() {
-        final long now = System.currentTimeMillis();
-        RealmResults<RealmChannel> allChannels = realm.getVisibleChannels();
-        final long time = System.currentTimeMillis() - now;
-        log("Read visible " + time + "ms, count = " + allChannels.size());
-        initAdapter(allChannels);
+//        final long now = System.currentTimeMillis();
+//        RealmResults<RealmChannel> allChannels = cacheManager.getVisibleChannels();
+//        final long time = System.currentTimeMillis() - now;
+//        log("Read visible " + time + "ms, count = " + allChannels.size());
+//        initAdapter(allChannels);
     }
 
 
     private void fetchAll() {
         final long now = System.currentTimeMillis();
-        RealmResults<RealmChannel> allChannels = realm.getAllChannels();
+        ListAdapter fullAdapter = cacheManager.getFullAdapter();
         final long time = System.currentTimeMillis() - now;
-        log("Read all " + time + "ms, count = " + allChannels.size());
-        initAdapter(allChannels);
+        log("Read all " + time + "ms, count = " + fullAdapter.getCount());
+        listView.setAdapter(fullAdapter);
     }
 
     ProgressDialog dialog;
@@ -242,7 +190,7 @@ public class MainActivity extends ActionBarActivity {
     }
 
     private void processFeed(String result) {
-        realm.process(result);
+        cacheManager.processFeed(result);
     }
 
     private void log(String error) {
