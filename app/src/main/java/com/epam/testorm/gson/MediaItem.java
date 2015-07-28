@@ -37,11 +37,8 @@ public class MediaItem implements Serializable {
     public MediaItem getImage() {
         return image;
     }
-    public String getThumbnailUrl() {
-        if (thumbnail == null) {
-            return null;
-        }
-        return thumbnail.getUrl();
+    public MediaItem getThumbnailUrl() {
+        return thumbnail;
     }
 
     public String getOriginalImage() {

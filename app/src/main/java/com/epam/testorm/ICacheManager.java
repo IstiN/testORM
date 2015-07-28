@@ -14,5 +14,7 @@ public interface ICacheManager {
 
     ListAdapter getFilteredAdapter();
 
+    ListAdapter getImagesOnlyAdapter();
+
 
 }

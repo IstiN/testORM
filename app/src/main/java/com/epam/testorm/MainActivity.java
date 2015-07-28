@@ -5,7 +5,6 @@ import android.os.Bundle;
 import android.support.v7.app.ActionBarActivity;
 import android.view.Menu;
 import android.view.MenuItem;
-import android.widget.Adapter;
 import android.widget.ListAdapter;
 import android.widget.ListView;
 import android.widget.TextView;
@@ -79,58 +78,33 @@ public class MainActivity extends ActionBarActivity {
             fetchAll();
             return true;
         }
-        if (id == R.id.action_vip) {
-            fetchVip();
+        if (id == R.id.action_filtered) {
+            fetchFiltered();
             return true;
         }
-        if (id == R.id.action_visible) {
-            fetchVisible();
-            return true;
-        }
-        if (id == R.id.action_hd) {
-            fetchHD();
-            return true;
-        }
-        if (id == R.id.action_live) {
-            fetchLive();
+        if (id == R.id.action_images) {
+            fetchImages();
             return true;
         }
 
         return super.onOptionsItemSelected(item);
     }
 
-    private void fetchHD() {
-//        final long now = System.currentTimeMillis();
-//        RealmResults<RealmChannel> allChannels = cacheManager.getHDChannels();
-//        final long time = System.currentTimeMillis() - now;
-//        log("Read hd " + time + "ms, count = " + allChannels.size());
-//        initAdapter(allChannels);
+    private void fetchFiltered() {
+        final long now = System.currentTimeMillis();
+        ListAdapter fullAdapter = cacheManager.getFilteredAdapter();
+        final long time = System.currentTimeMillis() - now;
+        log("Read filtered " + time + "ms, count = " + fullAdapter.getCount());
+        listView.setAdapter(fullAdapter);
     }
 
-    private void fetchLive() {
-//        final long now = System.currentTimeMillis();
-//        RealmResults<RealmChannel> allChannels = cacheManager.getLiveChannels();
-//        final long time = System.currentTimeMillis() - now;
-//        log("Read live " + time + "ms, count = " + allChannels.size());
-//        initAdapter(allChannels);
+    private void fetchImages() {
+        final long now = System.currentTimeMillis();
+        ListAdapter fullAdapter = cacheManager.getImagesOnlyAdapter();
+        final long time = System.currentTimeMillis() - now;
+        log("Read images " + time + "ms, count = " + fullAdapter.getCount());
+        listView.setAdapter(fullAdapter);
     }
-
-    private void fetchVip() {
-//        final long now = System.currentTimeMillis();
-//        RealmResults<RealmChannel> allChannels = cacheManager.getVIPChannels();
-//        final long time = System.currentTimeMillis() - now;
-//        log("Read vip " + time + "ms, count = " + allChannels.size());
-//        initAdapter(allChannels);
-    }
-
-    private void fetchVisible() {
-//        final long now = System.currentTimeMillis();
-//        RealmResults<RealmChannel> allChannels = cacheManager.getVisibleChannels();
-//        final long time = System.currentTimeMillis() - now;
-//        log("Read visible " + time + "ms, count = " + allChannels.size());
-//        initAdapter(allChannels);
-    }
-
 
     private void fetchAll() {
         final long now = System.currentTimeMillis();

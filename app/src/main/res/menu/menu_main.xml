@@ -5,12 +5,9 @@
         android:orderInCategory="100" app:showAsAction="never" />
     <item android:id="@+id/action_all" android:title="Select all"
         android:orderInCategory="100" app:showAsAction="never" />
-    <item android:id="@+id/action_visible" android:title="Select visible"
+    <item android:id="@+id/action_filtered" android:title="Select filtered"
         android:orderInCategory="100" app:showAsAction="never" />
-    <item android:id="@+id/action_hd" android:title="Select HD"
+    <item android:id="@+id/action_images" android:title="Select images"
         android:orderInCategory="100" app:showAsAction="never" />
-    <item android:id="@+id/action_vip" android:title="Select VIP"
-        android:orderInCategory="100" app:showAsAction="never" />
-    <item android:id="@+id/action_live" android:title="Select LIVE"
-        android:orderInCategory="100" app:showAsAction="never" />
+
 </menu>

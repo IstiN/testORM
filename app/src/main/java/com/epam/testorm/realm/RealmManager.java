@@ -1,10 +1,10 @@
 package com.epam.testorm.realm;
 
 import android.content.Context;
+import android.support.annotation.NonNull;
 import android.text.TextUtils;
 import android.view.View;
 import android.view.ViewGroup;
-import android.widget.Adapter;
 import android.widget.ImageView;
 import android.widget.ListAdapter;
 import android.widget.TextView;
@@ -13,24 +13,37 @@ import com.epam.testorm.ICacheManager;
 import com.epam.testorm.R;
 import com.epam.testorm.StringUtils;
 import com.epam.testorm.gson.BaseResponse;
+import com.epam.testorm.gson.MediaItem;
 import com.epam.testorm.gson.StreamDetails;
 import com.epam.testorm.realm.model.AuthorRealm;
+import com.epam.testorm.realm.model.ContentRealm;
 import com.epam.testorm.realm.model.MediaItemRealm;
 import com.epam.testorm.realm.model.MediaRealm;
 import com.epam.testorm.realm.model.NewsItemRealm;
+import com.google.gson.ExclusionStrategy;
+import com.google.gson.FieldAttributes;
 import com.google.gson.Gson;
+import com.google.gson.GsonBuilder;
+import com.google.gson.JsonArray;
+import com.google.gson.JsonElement;
+import com.google.gson.JsonObject;
+import com.google.gson.JsonParser;
+import com.google.gson.reflect.TypeToken;
 import com.nostra13.universalimageloader.core.ImageLoader;
 
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 
+import java.lang.reflect.Type;
+import java.util.ArrayList;
 import java.util.List;
 
 import io.realm.Realm;
 import io.realm.RealmBaseAdapter;
 import io.realm.RealmConfiguration;
 import io.realm.RealmList;
+import io.realm.RealmObject;
 import io.realm.RealmResults;
 
 /**
@@ -50,10 +63,41 @@ public class RealmManager implements ICacheManager {
     @Override
     public void processFeed(String feed) {
 
-        Gson gson = new Gson();
         Realm realm = Realm.getDefaultInstance();
-        BaseResponse channelsResponce = gson.fromJson(feed, BaseResponse.class);
-        List<StreamDetails> streams = channelsResponce.getData().getItems();
+//      processWithJSON(feed, realm);
+//      processWithGson(feed, realm);
+        processWithGson2(feed, realm);  //manual
+
+    }
+
+    private void processWithGson(String feed, Realm realm) {
+        Gson gson = new GsonBuilder()
+                .setExclusionStrategies(new ExclusionStrategy() {
+                    @Override
+                    public boolean shouldSkipField(FieldAttributes f) {
+                        return f.getDeclaringClass().equals(RealmObject.class);
+                    }
+
+                    @Override
+                    public boolean shouldSkipClass(Class<?> clazz) {
+                        return false;
+                    }
+                })
+                .create();
+        JsonElement json = new JsonParser().parse(feed);
+        JsonObject asJsonObject = json.getAsJsonObject();
+        JsonObject data = asJsonObject.getAsJsonObject("data");
+        JsonArray updates = data.getAsJsonArray("updates");
+        Type type = new TypeToken<List<NewsItemRealm>>() {
+        }.getType();
+        List<NewsItemRealm> streams = gson.fromJson(updates, type);
+        realm.beginTransaction();
+        realm.clear(NewsItemRealm.class);
+        realm.copyToRealmOrUpdate(streams);
+        realm.commitTransaction();
+    }
+
+    private void processWithJSON(String feed, Realm realm) {
         JSONArray result = null;
         try {
             JSONObject main = new JSONObject(feed);
@@ -64,18 +108,121 @@ public class RealmManager implements ICacheManager {
         }
         realm.beginTransaction();
         realm.clear(NewsItemRealm.class);
-
         realm.createOrUpdateAllFromJson(NewsItemRealm.class, result);
-//        for (StreamDetails item : streams) {
-//           processItem(item, realm);
-//        }
         realm.commitTransaction();
     }
+
+    private void processWithGson2(String feed, Realm realm) {
+        Gson gson = new Gson();
+        BaseResponse streamDetails = gson.fromJson(feed, BaseResponse.class);
+        List<StreamDetails> streams = streamDetails.getData().getItems();
+
+        RealmList<NewsItemRealm> realmList = new RealmList<>();
+        for (StreamDetails item : streams) {
+            realmList.add(processItem(item));
+        }
+        realm.beginTransaction();
+        realm.clear(NewsItemRealm.class);
+        realm.copyToRealmOrUpdate(realmList);
+        realm.commitTransaction();
+    }
+
+    private NewsItemRealm processItem(StreamDetails item) {
+        NewsItemRealm newsItem = new NewsItemRealm();
+        newsItem.setTimestamp(item.getTimestamp());
+        MediaItemRealm link = new MediaItemRealm();
+        link.setUrl(item.getLink());
+        newsItem.setLink(link);
+
+        AuthorRealm author = new AuthorRealm();
+        author.setId(item.getAuthor().getId());
+        author.setRef(item.getAuthor().getRef());
+        author.setNetwork(item.getAuthor().getNetwork());
+        author.setDisplayName(item.getAuthor().getDisplayName());
+
+        MediaItemRealm avatar = new MediaItemRealm();
+        avatar.setUrl(checkNull(item.getAuthor().getAvatar()));
+        author.setAvatar(avatar);
+
+        MediaItemRealm profile = new MediaItemRealm();
+        profile.setUrl(checkNull(item.getAuthor().getProfileUrl()));
+        author.setProfile(profile);
+        newsItem.setAuthor(author);
+
+        ContentRealm content = new ContentRealm();
+        content.setComment(checkNull(item.getContentComment()));
+        content.setTitle(checkNull(item.getContentTitle()));
+        content.setDescription(checkNull(item.getContentDesc()));
+        MediaRealm mediaRealm = new MediaRealm();
+        StreamDetails.Media contentMedia = item.getContentMedia();
+        if (contentMedia != null) {
+            mediaRealm.setAudios(processMediaContent(contentMedia.getAudios()));
+            mediaRealm.setVideos(processMediaContent(contentMedia.getVideos()));
+            mediaRealm.setPhotos(processMediaContent(contentMedia.getPhotos()));
+            mediaRealm.setLinks(processMediaContent(contentMedia.getLinks()));
+        }
+        content.setMedia(mediaRealm);
+        newsItem.setContent(content);
+        return newsItem;
+    }
+
+    private String checkNull(String value) {
+        if (value == null) {
+            return "";
+        }
+        return value;
+    }
+
+    private RealmList<MediaItemRealm> processMediaContent(ArrayList<MediaItem> audios) {
+        RealmList<MediaItemRealm> audiosRealmList = new RealmList<>();
+        if (audios != null) {
+            for (MediaItem audio : audios) {
+                MediaItemRealm media = new MediaItemRealm();
+                media.setTitle(checkNull(audio.getTitle()));
+                media.setUrl(checkNull(audio.getUrl()));
+                media.setDescription(checkNull(audio.getDescription()));
+                if (audio.getImage() != null) {
+                    MediaItemRealm image = new MediaItemRealm();
+                    image.setTitle(checkNull(audio.getImage().getTitle()));
+                    image.setUrl(checkNull(audio.getImage().getUrl()));
+                    media.setImage(image);
+                }
+                if (audio.getThumbnailUrl() != null) {
+                    MediaItemRealm image = new MediaItemRealm();
+                    image.setTitle(checkNull(audio.getThumbnailUrl().getTitle()));
+                    image.setUrl(checkNull(audio.getThumbnailUrl().getUrl()));
+                    media.setImage(image);
+                }
+                audiosRealmList.add(media);
+            }
+        }
+        return audiosRealmList;
+    }
+
 
     @Override
     public ListAdapter getFullAdapter() {
         Realm realm = Realm.getDefaultInstance();
         RealmResults<NewsItemRealm> all = realm.where(NewsItemRealm.class).findAll();
+        return createAdapter(all);
+    }
+
+    @Override
+    public ListAdapter getFilteredAdapter() {
+        Realm realm = Realm.getDefaultInstance();
+        RealmResults<NewsItemRealm> filtered = realm.where(NewsItemRealm.class).equalTo("author.displayName", "Lenta.Ru").or().equalTo("author.displayName", "AdMe.Ru").findAll();
+        return createAdapter(filtered);
+    }
+
+    @Override
+    public ListAdapter getImagesOnlyAdapter() {
+        Realm realm = Realm.getDefaultInstance();
+        RealmResults<NewsItemRealm> filtered = realm.where(NewsItemRealm.class).contains("content.media.photos.url","http").findAll();
+        return createAdapter(filtered);
+    }
+
+    @NonNull
+    private ListAdapter createAdapter(final RealmResults<NewsItemRealm> all) {
         RealmBaseAdapter mAdapter = new RealmBaseAdapter<NewsItemRealm>(mContext, all, true) {
             @Override
             public View getView(int position, View convertView, ViewGroup parent) {
@@ -143,111 +290,6 @@ public class RealmManager implements ICacheManager {
         }
     }
 
-    @Override
-    public ListAdapter getFilteredAdapter() {
-        return null;
-    }
 
-    private void processItem(StreamDetails item, Realm realm) {
-        NewsItemRealm newsItem = realm.createObject(NewsItemRealm.class);
-//        newsItem.setId(item.getTimestamp());
-        newsItem.setTimestamp(item.getTimestamp());
-        MediaItemRealm link = realm.createObject(MediaItemRealm.class);
-        link.setUrl(item.getLink());
-        newsItem.setLink(link);
 
-        AuthorRealm author = realm.createObject(AuthorRealm.class);
-        author.setId(item.getAuthor().getId());
-        author.setRef(item.getAuthor().getRef());
-        author.setNetwork(item.getAuthor().getNetwork());
-        author.setDisplayName(item.getAuthor().getDisplayName());
-
-        MediaItemRealm avatar = realm.createObject(MediaItemRealm.class);
-        avatar.setUrl(item.getAuthor().getAvatar());
-        author.setAvatar(avatar);
-
-        MediaItemRealm profile = realm.createObject(MediaItemRealm.class);
-        profile.setUrl(item.getAuthor().getProfileUrl());
-        author.setProfile(profile);
-        newsItem.setAuthor(author);
-
-//        //process content
-//        ContentRealm content = realm.createOrUpdateAllFromJson();
-//                channel.setChannelNumber(item.getChannelNumber());
-//        channel.setLanguageCode(item.getLanguageCode());
-//        channel.setVisible(item.isVisible());
-//
-//        Params params = item.getStationSchedules().get(0);
-//        Station station = params.getStation();
-//        RealmStation realmStation = realm.createObject(RealmStation.class);
-//
-//        realmStation.setId(station.getId());
-//        realmStation.setTitle(validate(station.getTitle()));
-//        realmStation.setDescription(validate(station.getDescription()));
-//        realmStation.setHd(station.isHd());
-//        realmStation.setOutOfHomeEnabled(station.isOutOfHomeEnabled());
-//        realmStation.setScrubbingEnabled(station.isScrubbingEnabled());
-//        realmStation.setServiceId(validate(station.getServiceId()));
-//
-//        List<Images> images = station.getImages();
-//        if (images != null && images.size() > 0) {
-//            for (Images image : images) {
-//                RealmImages realmImage = realm.createObject(RealmImages.class);
-//                realmImage.setAssetType(image.getAssetType());
-//                realmImage.setUrl(image.getUrl());
-//                realmStation.getImages().add(realmImage);
-//            }
-//        }
-//        List<VideoStream> videos = station.getVideoStreams();
-//        if (videos != null && videos.size() > 0) {
-//            for (VideoStream video : videos) {
-//                RealmVideoStream realmVideo = realm.createObject(RealmVideoStream.class);
-//                realmVideo.setAssetType(video.getAssetType());
-//                realmVideo.setUrl(video.getUrl());
-//                realmVideo.setProtectionKey(video.getProtectionKey());
-//                realmStation.getVideoStreams().add(realmVideo);
-//            }
-//        }
-//        List<String> entitlements = station.getEntitlements();
-//        if (entitlements != null && entitlements.size() > 0) {
-//            for (String value : entitlements) {
-//                RealmEntitlement realmEntitlement = realm.createObject(RealmEntitlement.class);
-//                realmEntitlement.setValue(value);
-//                realmStation.getEntitlements().add(realmEntitlement);
-//            }
-//        }
-//        channel.setStationSchedules(realmStation);
-    }
-
-    private String validate(String title) {
-        if (TextUtils.isEmpty(title)) {
-            title = "";
-        }
-        return title;
-    }
-
-//    public RealmResults<RealmChannel> getAllChannels() {
-//        Realm realm = Realm.getDefaultInstance();
-//        return realm.where(RealmChannel.class).findAll();
-//    }
-//
-//    public RealmResults<RealmChannel> getVisibleChannels() {
-//        Realm realm = Realm.getDefaultInstance();
-//        return realm.where(RealmChannel.class).equalTo("visible", true).findAll();
-//    }
-//
-//    public RealmResults<RealmChannel> getHDChannels() {
-//        Realm realm = Realm.getDefaultInstance();
-//        return realm.where(RealmChannel.class).equalTo("stationSchedules.isHd", true).findAll();
-//    }
-//
-//    public RealmResults<RealmChannel> getVIPChannels() {
-//        Realm realm = Realm.getDefaultInstance();
-//        return realm.where(RealmChannel.class).contains("stationSchedules.entitlements.value", "VIP").findAll();
-//    }
-//
-//    public RealmResults<RealmChannel> getLiveChannels() {
-//        Realm realm = Realm.getDefaultInstance();
-//        return realm.where(RealmChannel.class).contains("stationSchedules.videoStreams.url", "http").findAll();
-//    }
 }
