@@ -1,6 +1,6 @@
 package com.epam.testorm.realm;
 
-import android.content.Context;
+import android.app.Activity;
 import android.support.annotation.NonNull;
 import android.text.TextUtils;
 import android.view.View;
@@ -52,10 +52,10 @@ import io.realm.RealmResults;
 public class RealmManager implements ICacheManager {
 
 
-    private Context mContext;
+    private Activity mActivity;
 
-    public RealmManager(Context context) {
-        mContext = context;
+    public RealmManager(Activity context) {
+        mActivity = context;
         RealmConfiguration realmConfiguration = new RealmConfiguration.Builder(context).build();
         Realm.setDefaultConfiguration(realmConfiguration);
     }
@@ -223,7 +223,7 @@ public class RealmManager implements ICacheManager {
 
     @NonNull
     private ListAdapter createAdapter(final RealmResults<NewsItemRealm> all) {
-        RealmBaseAdapter mAdapter = new RealmBaseAdapter<NewsItemRealm>(mContext, all, true) {
+        RealmBaseAdapter mAdapter = new RealmBaseAdapter<NewsItemRealm>(mActivity, all, true) {
             @Override
             public View getView(int position, View convertView, ViewGroup parent) {
                 if (convertView == null) {

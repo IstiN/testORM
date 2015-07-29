@@ -26,7 +26,6 @@ public class MainActivity extends ActionBarActivity {
 
     private ICacheManager cacheManager;
     private ListView listView;
-    private ListAdapter mAdapter;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
