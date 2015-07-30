@@ -4,11 +4,12 @@ package com.epam.testorm.sugar.model;
 import com.google.gson.annotations.Expose;
 import com.google.gson.annotations.SerializedName;
 import com.orm.SugarRecord;
+import com.orm.dsl.Table;
 
 /**
  * Created by Mikhail_Ivanou on 7/27/2015.
  */
-public class AuthorSugar extends SugarRecord<AuthorSugar> {
+public class AuthorSugar extends SugarRecord {
 
     @Expose
     private String network;

@@ -1,14 +1,12 @@
 package com.epam.testorm.sugar.model;
 
 import com.google.gson.annotations.Expose;
-import com.orm.SugarApp;
-import com.orm.SugarConfig;
 import com.orm.SugarRecord;
 
 /**
  * Created by Mikhail_Ivanou on 7/27/2015.
  */
-public class ContentSugar extends SugarRecord<ContentSugar> {
+public class ContentSugar extends SugarRecord {
 
     @Expose
     private String title;

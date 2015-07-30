@@ -2,19 +2,23 @@ package com.epam.testorm.sugar.model;
 
 import com.google.gson.annotations.Expose;
 import com.orm.SugarRecord;
+import com.orm.dsl.Table;
 
 /**
  * Created by Mikhail_Ivanou on 7/27/2015.
  */
-public class NewsItemSugar extends SugarRecord<NewsItemSugar> {
+public class NewsItemSugar extends SugarRecord {
 
     @Expose
+    @Table
     private ContentSugar content;
     @Expose
     private long timestamp;
     @Expose
+    @Table
     private AuthorSugar author;
     @Expose
+    @Table
     private MediaItemSugar link;
 
     public NewsItemSugar() {

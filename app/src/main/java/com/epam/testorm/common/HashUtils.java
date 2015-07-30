@@ -1,4 +1,4 @@
-package com.epam.testorm;
+package com.epam.testorm.common;
 
 import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;

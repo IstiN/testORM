@@ -1,4 +1,4 @@
-package com.epam.testorm;
+package com.epam.testorm.common;
 
 import android.text.TextUtils;
 import android.widget.EditText;

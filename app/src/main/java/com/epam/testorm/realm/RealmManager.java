@@ -11,7 +11,7 @@ import android.widget.TextView;
 
 import com.epam.testorm.ICacheManager;
 import com.epam.testorm.R;
-import com.epam.testorm.StringUtils;
+import com.epam.testorm.common.StringUtils;
 import com.epam.testorm.gson.BaseResponse;
 import com.epam.testorm.gson.MediaItem;
 import com.epam.testorm.gson.StreamDetails;

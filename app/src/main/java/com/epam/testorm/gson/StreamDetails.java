@@ -1,6 +1,6 @@
 package com.epam.testorm.gson;
 
-import com.epam.testorm.HashUtils;
+import com.epam.testorm.common.HashUtils;
 
 import java.io.Serializable;
 import java.util.ArrayList;

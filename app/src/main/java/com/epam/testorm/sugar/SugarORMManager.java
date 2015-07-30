@@ -1,9 +1,18 @@
 package com.epam.testorm.sugar;
 
 import android.app.Activity;
+import android.support.annotation.NonNull;
+import android.text.TextUtils;
+import android.view.View;
+import android.widget.BaseAdapter;
+import android.widget.ImageView;
 import android.widget.ListAdapter;
+import android.widget.TextView;
 
 import com.epam.testorm.ICacheManager;
+import com.epam.testorm.R;
+import com.epam.testorm.common.AbstractListAdapter;
+import com.epam.testorm.common.StringUtils;
 import com.epam.testorm.gson.BaseResponse;
 import com.epam.testorm.gson.MediaItem;
 import com.epam.testorm.gson.StreamDetails;
@@ -18,12 +27,11 @@ import com.google.gson.FieldAttributes;
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
 import com.google.gson.annotations.Expose;
+import com.nostra13.universalimageloader.core.ImageLoader;
 import com.orm.SugarRecord;
 
 import java.util.ArrayList;
 import java.util.List;
-
-import io.realm.RealmObject;
 
 
 /**
@@ -32,11 +40,15 @@ import io.realm.RealmObject;
 public class SugarORMManager implements ICacheManager {
 
 
-    public SugarORMManager(Activity context) {
+    private Activity mActivity;
+
+    public SugarORMManager(Activity activity) {
+        mActivity = activity;
     }
 
     @Override
     public void processFeed(String string) {
+        SugarRecord.deleteAll(NewsItemSugar.class);
 //        manual(string);
         gsonOnly(string);
     }
@@ -147,7 +159,9 @@ public class SugarORMManager implements ICacheManager {
 
     @Override
     public ListAdapter getFullAdapter() {
-        return null;
+        List<NewsItemSugar> all = NewsItemSugar.find(NewsItemSugar.class, null, null);
+
+        return createAdapter((ArrayList)all);
     }
 
     @Override
@@ -159,4 +173,69 @@ public class SugarORMManager implements ICacheManager {
     public ListAdapter getImagesOnlyAdapter() {
         return null;
     }
+
+    @NonNull
+    private ListAdapter createAdapter(final ArrayList<NewsItemSugar> all) {
+        BaseAdapter adapter = new AbstractListAdapter<NewsItemSugar>(mActivity, R.layout.item, all) {
+
+            @Override
+            protected void initView(View convertView, NewsItemSugar item, int position) {
+                updateView(convertView, item);
+            }
+        };
+        return adapter;
+    }
+
+    private void updateView(View convertView, NewsItemSugar channel) {
+        ImageView posterView = (ImageView) convertView.findViewById(R.id.image);
+        MediaSugar media = channel.getContent().getMedia();
+        String posterUrl = null;
+        String posterTitle = null;
+        int mediaCount = 0;
+        if (media != null) {
+            List<MediaItemSugar> photos = media.getPhotos();
+            List<MediaItemSugar> urls = media.getLinks();
+            List<MediaItemSugar> videos = media.getVideos();
+
+            if (photos != null && photos.size() > 0) {
+                posterUrl = photos.get(0).getUrl();
+                posterTitle = photos.get(0).getTitle();
+                mediaCount = photos.size();
+            } else if (urls != null && urls.size() > 0 && urls.get(0).getImage() != null) {
+                posterUrl = urls.get(0).getImage().getUrl();
+                posterTitle = urls.get(0).getUrl();
+            } else if (videos != null && videos.size() > 0 && videos.get(0).getThumbnail() != null) {
+                posterUrl = videos.get(0).getThumbnail().getUrl();
+                posterTitle = videos.get(0).getDescription();
+            }
+            if (urls != null && urls.size() > 0) {
+                mediaCount += urls.size();
+            }
+            if (videos != null && videos.size() > 0) {
+                mediaCount += videos.size();
+            }
+        }
+        ImageLoader.getInstance().displayImage(posterUrl, posterView);
+        ImageView avatarView = (ImageView) convertView.findViewById(R.id.avatar);
+        ImageLoader.getInstance().displayImage(channel.getAuthor().getAvatar().getUrl(), avatarView);
+        setText(convertView, R.id.title, channel.getAuthor().getDisplayName());
+        setText(convertView, R.id.desc, StringUtils.isEmpty(channel.getContent().getTitle()) ? channel.getContent().getDescription() : channel.getContent().getTitle());
+
+        setText(convertView, R.id.videoUrl, posterTitle);
+        setText(convertView, R.id.videoKey, String.valueOf(mediaCount));
+        setText(convertView, R.id.entitlements, channel.getContent().getComment());
+
+
+    }
+
+    private void setText(View view, int id, String value) {
+        TextView number = (TextView) view.findViewById(id);
+        if (!TextUtils.isEmpty(value)) {
+            number.setText(value);
+            number.setVisibility(View.VISIBLE);
+        } else {
+            number.setVisibility(View.GONE);
+        }
+    }
+
 }
