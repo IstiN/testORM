@@ -3,6 +3,7 @@ package com.epam.testorm;
 import android.app.Activity;
 import android.content.Context;
 
+import com.epam.testorm.db.StreamDetailsManager;
 import com.epam.testorm.realm.RealmManager;
 import com.epam.testorm.sugar.SugarORMManager;
 import com.epam.testorm.xcore.XCoreManager;
@@ -22,7 +23,7 @@ public class CacheFactory {
         if (BuildConfig.ORM.equals("sugar")) {
             return new SugarORMManager(context);
         }
-        return new RealmManager(context);
+        return new StreamDetailsManager(context);
     }
 
 }
