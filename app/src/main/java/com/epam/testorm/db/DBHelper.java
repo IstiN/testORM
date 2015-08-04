@@ -6,7 +6,6 @@ import android.database.sqlite.SQLiteOpenHelper;
 import android.text.TextUtils;
 import android.util.Log;
 
-
 import com.epam.testorm.db.annotation.dbBoolean;
 import com.epam.testorm.db.annotation.dbDouble;
 import com.epam.testorm.db.annotation.dbIndex;
@@ -16,6 +15,8 @@ import com.epam.testorm.db.annotation.dbString;
 
 import java.lang.annotation.Annotation;
 import java.lang.reflect.Field;
+import java.util.HashMap;
+import java.util.Map;
 
 
 /**
@@ -57,7 +58,8 @@ public class DBHelper extends SQLiteOpenHelper {
             + ID_NAME
             + " LONG NOT NULL PRIMARY KEY)";
 
-    public void createTables(Class[] cacheItems) {
+    public Map<Class, String> createTables(Class[] cacheItems) {
+        HashMap<Class, String> names = new HashMap<>();
         SQLiteDatabase writableDatabase = mHelper.getWritableDatabase();
         writableDatabase.beginTransaction();
         for (Class current : cacheItems) {
@@ -66,12 +68,14 @@ public class DBHelper extends SQLiteOpenHelper {
                 continue;
             }
             String sql = String.format(CREATE_TABLE_SQL, tableName);
+            names.put(current, tableName);
             writableDatabase.execSQL(sql);
             createTableFields(writableDatabase, tableName, current);
 
         }
         writableDatabase.setTransactionSuccessful();
         writableDatabase.endTransaction();
+        return names;
     }
 
     public String getTableName(Class current) {
@@ -89,31 +93,49 @@ public class DBHelper extends SQLiteOpenHelper {
     }
 
     private void createTableFields(SQLiteDatabase writableDatabase, String tableName, Class cacheItem) {
-        Field[] declaredFields = cacheItem.getDeclaredFields();
-        for (Field field : declaredFields ) {
-            Annotation[] declaredAnnotations = field.getDeclaredAnnotations();
-            if (declaredAnnotations != null && declaredAnnotations.length > 0) {
-                String index = " ";
-                String type;
-                for (Annotation attr : declaredAnnotations) {
-                    type = getType(attr);
-                    String dbField = field.getName();
-                    if (!TextUtils.isEmpty(type)) {
-                        try {
-                            String sql = "ALTER TABLE %s ADD `" + dbField + "` " + type + " " + index;
-                            writableDatabase.execSQL(String.format(sql, tableName));
-                        } catch (Exception e) {
-                            Log.e("DB", e.getLocalizedMessage());
-                        }
+        try {
+            Object instance = cacheItem.newInstance();
 
+            Field[] declaredFields = cacheItem.getDeclaredFields();
+
+            for (Field field : declaredFields) {
+                processField(writableDatabase, tableName, instance, field);
+            }
+            Object superclass = cacheItem.getSuperclass().newInstance();
+            declaredFields = superclass.getClass().getDeclaredFields();
+            for (Field field : declaredFields) {
+                processField(writableDatabase, tableName, instance, field);
+            }
+        } catch (InstantiationException e) {
+            e.printStackTrace();
+        } catch (IllegalAccessException e) {
+            e.printStackTrace();
+        }
+    }
+
+    private void processField(SQLiteDatabase writableDatabase, String tableName, Object instance, Field field) throws IllegalAccessException {
+        Annotation[] declaredAnnotations = field.getDeclaredAnnotations();
+        if (declaredAnnotations != null && declaredAnnotations.length > 0) {
+            String index = " ";
+            String type;
+            for (Annotation attr : declaredAnnotations) {
+                type = getType(attr);
+                String dbField = (String) field.get(instance);
+                if (!TextUtils.isEmpty(type)) {
+                    try {
+                        String sql = "ALTER TABLE %s ADD `" + dbField + "` " + type + " " + index;
+                        writableDatabase.execSQL(String.format(sql, tableName));
+                    } catch (Exception e) {
+                        Log.e("DB", e.getLocalizedMessage());
                     }
-                    if (attr instanceof dbIndex) {
-                        try {
-                        String sql = "CREATE INDEX " + dbField + "_" + tableName + "_" +  "_index ON "+tableName+"("+ dbField +")";
+
+                }
+                if (attr instanceof dbIndex) {
+                    try {
+                        String sql = "CREATE INDEX " + dbField + "_" + tableName + "_" + "_index ON " + tableName + "(" + dbField + ")";
                         writableDatabase.execSQL(sql);
-                        } catch (Exception e) {
-                            Log.e("DB", e.getLocalizedMessage());
-                        }
+                    } catch (Exception e) {
+                        Log.e("DB", e.getLocalizedMessage());
                     }
                 }
             }

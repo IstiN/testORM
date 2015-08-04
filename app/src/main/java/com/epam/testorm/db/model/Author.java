@@ -3,7 +3,6 @@ package com.epam.testorm.db.model;
 import com.epam.testorm.db.ICache;
 import com.epam.testorm.db.annotation.dbLong;
 import com.epam.testorm.db.annotation.dbString;
-import com.epam.testorm.gson.MediaItem;
 
 /**
  * Created by Mikhail_Ivanou on 8/4/2015.
@@ -16,15 +15,15 @@ public class Author implements ICache {
     }
 
     @dbString
-    private String network;
+    public static String NETWORK = "network";
     @dbString
-    private String id;
+    public static String USER_ID = "user_id";
     @dbString
-    private String displayName;
+    public static String DISPLAY_NAME = "displayName";
     @dbString
-    private String avatar;
+    public static String AVATAR = "avatar";
     @dbString
-    private String profile;
+    public static String PROFILE = "profile";
     @dbLong
-    private Long ref;
+    public static String REF = "ref";
 }

@@ -168,6 +168,6 @@ public class MainActivity extends ActionBarActivity {
 
     private void log(String error) {
         TextView view = (TextView) findViewById(R.id.log);
-        view.setText(error);
+        view.setText(error + " (" + BuildConfig.ORM + ")" );
     }
 }

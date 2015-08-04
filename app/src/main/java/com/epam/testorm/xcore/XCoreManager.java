@@ -1,7 +1,6 @@
 package com.epam.testorm.xcore;
 
 import android.app.Activity;
-import android.content.Context;
 import android.widget.ListAdapter;
 
 import com.epam.testorm.ICacheManager;

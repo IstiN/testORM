@@ -73,6 +73,10 @@ public class StreamDetails {
         return link.getUrl();
     }
 
+    public MediaItem getLinkItem() {
+        return link;
+    }
+
     public class Author implements Serializable {
         private String network;
         private String id;

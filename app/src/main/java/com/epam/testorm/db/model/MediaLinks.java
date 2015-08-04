@@ -14,8 +14,8 @@ public class MediaLinks implements ICache {
     }
 
     @dbLong
-    public static Long newsId;
-    
+    public static String newsId = "newsId";
+
     @dbLong
-    public static Long itemId;
+    public static String itemId = "itemId";
 }

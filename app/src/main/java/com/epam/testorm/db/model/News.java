@@ -14,14 +14,14 @@ public class News implements ICache {
     }
 
     @dbLong
-    public static Long author;
+    public static String AUTHOR = "author";
 
     @dbLong
-    public static Long content;
+    public static String CONTENT = "content";
 
     @dbLong
-    public static Long timestamp;
+    public static String TIMESTAMP = "time";
 
     @dbLong
-    public static Long url;
+    public static String URL = "url";
 }

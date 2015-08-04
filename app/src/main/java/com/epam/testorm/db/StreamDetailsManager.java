@@ -10,12 +10,12 @@ import android.util.Log;
 import android.widget.ListAdapter;
 
 import com.epam.testorm.ICacheManager;
-
+import com.epam.testorm.common.HashUtils;
 import com.epam.testorm.db.model.Author;
 import com.epam.testorm.db.model.Content;
-import com.epam.testorm.db.model.Links;
 import com.epam.testorm.db.model.MediaAudios;
 import com.epam.testorm.db.model.MediaImages;
+import com.epam.testorm.db.model.MediaItem;
 import com.epam.testorm.db.model.MediaLinks;
 import com.epam.testorm.db.model.MediaVideos;
 import com.epam.testorm.db.model.News;
@@ -23,7 +23,9 @@ import com.epam.testorm.gson.BaseResponse;
 import com.epam.testorm.gson.StreamDetails;
 import com.google.gson.Gson;
 
+import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
 
 public class StreamDetailsManager implements ICacheManager {
 
@@ -31,15 +33,13 @@ public class StreamDetailsManager implements ICacheManager {
 
     private DBHelper mDBHelper;
 
-    private static StreamDetailsManager instance;
-
-    private static Gson gson = new Gson();
+    private Map<Class, String> tablesNames;
 
     static Class[] tables = new Class[]{
             News.class,
             Author.class,
             Content.class,
-            Links.class,
+            MediaItem.class,
             MediaAudios.class,
             MediaVideos.class,
             MediaImages.class,
@@ -49,14 +49,7 @@ public class StreamDetailsManager implements ICacheManager {
 
     public StreamDetailsManager(Context ctx) {
         mDBHelper = DBHelper.getInstance(ctx);
-        mDBHelper.createTables(tables);
-    }
-
-    public static StreamDetailsManager getInstance(Context ctx) {
-        if (instance == null) {
-            instance = new StreamDetailsManager(ctx);
-        }
-        return instance;
+        tablesNames = mDBHelper.createTables(tables);
     }
 
     public long addFirstItems(List<StreamDetails> list, long streamId) throws SQLiteException {
@@ -210,6 +203,117 @@ public class StreamDetailsManager implements ICacheManager {
         Gson gson = new Gson();
         BaseResponse streamDetails = gson.fromJson(feed, BaseResponse.class);
         List<StreamDetails> streams = streamDetails.getData().getItems();
+        SQLiteDatabase db = mDBHelper.getWritableDatabase();
+        db.beginTransactionNonExclusive();
+        clearCache();
+        for (int i = 0; i < streams.size(); i++) {
+            StreamDetails item = streams.get(i);
+            long result = processNews(db, item);
+            if (result < 0) {
+                db.endTransaction();
+                return;
+            }
+        }
+        db.setTransactionSuccessful();
+        db.endTransaction();
+    }
+
+    private long processNews(SQLiteDatabase db, StreamDetails item) {
+        ContentValues news = new ContentValues();
+        long time = item.getTimestamp() == null ? 0 : item.getTimestamp();
+        long newsId = HashUtils.generateId(time, item.getLink());
+        news.put(DBHelper.ID_NAME, newsId);
+        news.put(News.TIMESTAMP, time);
+        StreamDetails.Author itemAuthor = item.getAuthor();  // process author
+        if (itemAuthor !=null) {
+            ContentValues author = new ContentValues();
+            author.put(Author.USER_ID, itemAuthor.getId());
+            author.put(Author.AVATAR, itemAuthor.getAvatar());
+            author.put(Author.DISPLAY_NAME, itemAuthor.getDisplayName());
+            author.put(Author.PROFILE, itemAuthor.getProfileUrl());
+            author.put(Author.NETWORK, itemAuthor.getNetwork());
+            author.put(Author.REF, itemAuthor.getRef());
+            author.put(DBHelper.ID_NAME, itemAuthor.getRef());
+            long l = db.insertWithOnConflict(tablesNames.get(Author.class), null, author, SQLiteDatabase.CONFLICT_REPLACE);
+            Log.d("DB_RESULT", "author " + l);
+            news.put(News.AUTHOR, itemAuthor.getRef());
+        }
+        com.epam.testorm.gson.MediaItem itemLink = item.getLinkItem();  // process author
+        if (itemLink !=null) {
+            ContentValues link = new ContentValues();
+            link.put(MediaItem.URL, itemLink.getUrl());
+            long generateId = HashUtils.generateId(itemLink.getUrl());
+            link.put(DBHelper.ID_NAME, generateId);
+            long l = db.insertWithOnConflict(tablesNames.get(MediaItem.class), null, link, SQLiteDatabase.CONFLICT_REPLACE);
+            Log.d("DB_RESULT", "links " + l);
+            news.put(News.URL, generateId);
+        }
+        ContentValues content = new ContentValues();
+        content.put(Content.COMMENT, item.getContentComment());
+        content.put(Content.DESCRIPTION, item.getContentDesc());
+        content.put(Content.TITLE, item.getContentTitle());
+        long generateId = HashUtils.generateId(item.getContentTitle(), item.getContentDesc(), item.getContentComment());
+        content.put(DBHelper.ID_NAME, generateId);
+        long l = db.insertWithOnConflict(tablesNames.get(Content.class), null, content, SQLiteDatabase.CONFLICT_REPLACE);
+        Log.d("DB_RESULT", "content " + l);
+        news.put(News.CONTENT, generateId);
+        l = db.insertWithOnConflict(tablesNames.get(News.class), null, news, SQLiteDatabase.CONFLICT_REPLACE);
+        Log.d("DB_RESULT", "news " + l);
+        StreamDetails.Media contentMedia = item.getContentMedia();
+        if (contentMedia != null) {
+            l = processMedia(db, contentMedia, newsId);
+        }
+
+        return l;
+    }
+
+    private long processMedia(SQLiteDatabase db, StreamDetails.Media contentMedia, long newsId) {
+        long l = 0;
+        ArrayList<com.epam.testorm.gson.MediaItem> audios = contentMedia.getAudios();
+        if (audios != null) {
+            for (com.epam.testorm.gson.MediaItem item : audios) {
+                l = addRecord(db, newsId, item, MediaAudios.class);
+            }
+        }
+        ArrayList<com.epam.testorm.gson.MediaItem> videos = contentMedia.getVideos();
+        if (videos != null) {
+            for (com.epam.testorm.gson.MediaItem item : videos) {
+                l = addRecord(db, newsId, item, MediaVideos.class);
+            }
+        }
+        ArrayList<com.epam.testorm.gson.MediaItem> photos = contentMedia.getPhotos();
+        if (photos != null) {
+            for (com.epam.testorm.gson.MediaItem item : photos) {
+                l = addRecord(db, newsId, item, MediaImages.class);
+            }
+        }
+        ArrayList<com.epam.testorm.gson.MediaItem> links = contentMedia.getLinks();
+        if (links != null) {
+            for (com.epam.testorm.gson.MediaItem item : links) {
+                l = addRecord(db, newsId, item, MediaLinks.class);
+            }
+        }
+        return l;
+    }
+
+    private long addRecord(SQLiteDatabase db, long newsId, com.epam.testorm.gson.MediaItem item, Class recordClass) {
+        ContentValues media = new ContentValues();
+        media.put(MediaItem.DESCRIPTION, item.getDescription());
+        media.put(MediaItem.URL, item.getUrl());
+        media.put(MediaItem.IMAGE, item.getImage() == null ? null : item.getImage().getUrl());
+        media.put(MediaItem.ORIGINAL, item.getOriginalImage());
+        media.put(MediaItem.THUMBNAIL, item.getThumbnailUrl() == null? null : item.getThumbnailUrl().getUrl());
+        media.put(MediaItem.TITLE, item.getTitle());
+        long generateId = HashUtils.generateId(item.getUrl());
+        media.put(DBHelper.ID_NAME, generateId);
+        ContentValues record = new ContentValues();
+        record.put(DBHelper.ID_NAME, HashUtils.generateId(newsId, generateId));
+        record.put(MediaAudios.newsId, generateId);
+        record.put(MediaAudios.itemId, newsId);
+        long l = db.insertWithOnConflict(tablesNames.get(MediaItem.class), null, media, SQLiteDatabase.CONFLICT_REPLACE);
+        l = db.insertWithOnConflict(tablesNames.get(recordClass), null, record, SQLiteDatabase.CONFLICT_REPLACE);
+        Log.d("DB_RESULT", recordClass.getSimpleName() + " " + l);
+        return l;
     }
 
     @Override
