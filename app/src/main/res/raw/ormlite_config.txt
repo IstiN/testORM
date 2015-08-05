@@ -1,0 +1,55 @@
+# --table-start--
+dataClass=com.epam.testorm.ormlite.model.ORMNews
+tableName=ORMNews
+# --table-fields-start--
+# --field-start--
+fieldName=id
+columnName=id
+generatedId=true
+# --field-end--
+# --field-start--
+fieldName=author
+columnName=author
+foreign=true
+# --field-end--
+# --field-start--
+fieldName=time
+columnName=time
+# --field-end--
+# --table-fields-end--
+# --table-end--
+#################################
+
+#################################
+# --table-start--
+dataClass=com.epam.testorm.ormlite.model.ORMAuthor
+tableName=ORMAuthor
+# --table-fields-start--
+# --field-start--
+fieldName=id
+columnName=id
+generatedId=true
+# --field-end--
+# --field-start--
+fieldName=ref
+columnName=ref
+# --field-end--
+# --field-start--
+fieldName=network
+columnName=network
+# --field-end--
+# --field-start--
+fieldName=user_id
+# --field-end--
+# --field-start--
+fieldName=displayName
+# --field-end--
+# --field-start--
+fieldName=profile
+# --field-end--
+# --field-start--
+fieldName=avatar
+# --field-end--
+# --table-fields-end--
+# --table-end--
+#################################

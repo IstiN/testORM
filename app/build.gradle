@@ -37,6 +37,10 @@ android {
             flavorDimension "orm"
             buildConfigField "String", "ORM", '"sugar"';
         }
+        "ORMLite" {
+            flavorDimension "orm"
+            buildConfigField "String", "ORM", '"ORMLite"';
+        }
     }
 }
 
