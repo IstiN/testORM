@@ -14,6 +14,7 @@ import com.epam.testorm.R;
 import com.epam.testorm.common.AbstractListAdapter;
 import com.epam.testorm.common.StringUtils;
 import com.epam.testorm.gson.BaseResponse;
+import com.epam.testorm.gson.Media;
 import com.epam.testorm.gson.MediaItem;
 import com.epam.testorm.gson.StreamDetails;
 import com.epam.testorm.sugar.model.AuthorSugar;
@@ -111,7 +112,8 @@ public class SugarORMManager implements ICacheManager {
         content.setTitle(checkNull(item.getContentTitle()));
         content.setDescription(checkNull(item.getContentDesc()));
         MediaSugar mediaSugar = new MediaSugar();
-        StreamDetails.Media contentMedia = item.getContentMedia();
+
+        Media contentMedia = item.getContentMedia();
         if (contentMedia != null) {
             mediaSugar.setAudios(processMediaContent(contentMedia.getAudios()));
             mediaSugar.setVideos(processMediaContent(contentMedia.getVideos()));

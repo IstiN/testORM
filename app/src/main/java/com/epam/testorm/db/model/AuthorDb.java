@@ -7,7 +7,7 @@ import com.epam.testorm.db.annotation.dbString;
 /**
  * Created by Mikhail_Ivanou on 8/4/2015.
  */
-public class Author implements ICache {
+public class AuthorDb implements ICache {
 
     @Override
     public String getTableName() {

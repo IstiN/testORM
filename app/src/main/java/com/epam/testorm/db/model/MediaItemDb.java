@@ -6,7 +6,7 @@ import com.epam.testorm.db.annotation.dbString;
 /**
  * Created by Mikhail_Ivanou on 8/4/2015.
  */
-public class MediaItem implements ICache {
+public class MediaItemDb implements ICache {
 
     @dbString
     public static String URL = "url";

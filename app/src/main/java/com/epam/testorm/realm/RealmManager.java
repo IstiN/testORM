@@ -13,6 +13,7 @@ import com.epam.testorm.ICacheManager;
 import com.epam.testorm.R;
 import com.epam.testorm.common.StringUtils;
 import com.epam.testorm.gson.BaseResponse;
+import com.epam.testorm.gson.Media;
 import com.epam.testorm.gson.MediaItem;
 import com.epam.testorm.gson.StreamDetails;
 import com.epam.testorm.realm.model.AuthorRealm;
@@ -154,7 +155,7 @@ public class RealmManager implements ICacheManager {
         content.setTitle(checkNull(item.getContentTitle()));
         content.setDescription(checkNull(item.getContentDesc()));
         MediaRealm mediaRealm = new MediaRealm();
-        StreamDetails.Media contentMedia = item.getContentMedia();
+        Media contentMedia = item.getContentMedia();
         if (contentMedia != null) {
             mediaRealm.setAudios(processMediaContent(contentMedia.getAudios()));
             mediaRealm.setVideos(processMediaContent(contentMedia.getVideos()));

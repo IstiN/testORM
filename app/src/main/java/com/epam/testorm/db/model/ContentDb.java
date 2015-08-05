@@ -6,7 +6,7 @@ import com.epam.testorm.db.annotation.dbString;
 /**
  * Created by Mikhail_Ivanou on 8/4/2015.
  */
-public class Content implements ICache {
+public class ContentDb implements ICache {
     @Override
     public String getTableName() {
         return "content";

@@ -21,6 +21,15 @@ public class MediaItem implements Serializable {
         this.url = url;
     }
 
+    public MediaItem(String url, String title, MediaItem image, String original, MediaItem thumbnail, String description) {
+        this.url = url;
+        this.title = title;
+        this.image = image;
+        this.original = original;
+        this.thumbnail = thumbnail;
+        this.description = description;
+    }
+
     public MediaItem(int mediaType) {
         this.mediaType = mediaType;
     }
