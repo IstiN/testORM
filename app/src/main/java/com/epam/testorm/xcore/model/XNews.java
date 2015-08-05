@@ -17,8 +17,8 @@ import by.istin.android.xcore.utils.HashUtils;
  */
 public class XNews implements BaseColumns, IGenerateID {
 
-//    @dbEntity(clazz = XAuthor.class)
-//    public static String AUTHOR = "author";
+    @dbEntity(clazz = XAuthor.class)
+    public static String AUTHOR = "author";
 
     @dbEntity(clazz = XContent.class)
     public static String CONTENT = "content";
