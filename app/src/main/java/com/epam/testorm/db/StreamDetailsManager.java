@@ -122,7 +122,6 @@ public class StreamDetailsManager implements ICacheManager {
             author.put(AuthorDb.REF, itemAuthor.getRef());
             author.put(DBHelper.ID_NAME, itemAuthor.getRef());
             long l = db.insertWithOnConflict(tablesNames.get(AuthorDb.class), null, author, SQLiteDatabase.CONFLICT_REPLACE);
-            Log.d("DB_RESULT", "author " + l);
             news.put(News.AUTHOR, itemAuthor.getRef());
         }
         com.epam.testorm.gson.MediaItem itemLink = item.getLinkItem();  // process author
