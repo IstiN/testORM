@@ -16,8 +16,17 @@ public class ORMNews {
     @DatabaseField
     private Long time;
 
+    @DatabaseField
+    private String url;
+
     @DatabaseField(canBeNull = false, foreign = true, foreignAutoRefresh = true)
     private ORMAuthor author;
+    public static String AUTHOR = "author_id";
+
+
+    @DatabaseField(canBeNull = false, foreign = true, foreignAutoRefresh = true)
+    private ORMContent content;
+    public static String CONTENT = "content_id";
 
     public ORMNews() {
     }
@@ -50,5 +59,13 @@ public class ORMNews {
 
     public void setAuthor(ORMAuthor author) {
         this.author = author;
+    }
+
+    public ORMContent getContent() {
+        return content;
+    }
+
+    public void setContent(ORMContent content) {
+        this.content = content;
     }
 }

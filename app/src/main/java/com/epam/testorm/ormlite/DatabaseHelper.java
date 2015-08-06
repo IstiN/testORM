@@ -5,8 +5,13 @@ import android.database.sqlite.SQLiteDatabase;
 import android.util.Log;
 
 import com.epam.testorm.R;
+import com.epam.testorm.ormlite.model.ORMAudios;
 import com.epam.testorm.ormlite.model.ORMAuthor;
+import com.epam.testorm.ormlite.model.ORMContent;
+import com.epam.testorm.ormlite.model.ORMImages;
+import com.epam.testorm.ormlite.model.ORMLinks;
 import com.epam.testorm.ormlite.model.ORMNews;
+import com.epam.testorm.ormlite.model.ORMVideos;
 import com.j256.ormlite.android.apptools.OrmLiteSqliteOpenHelper;
 import com.j256.ormlite.dao.Dao;
 import com.j256.ormlite.support.ConnectionSource;
@@ -30,6 +35,11 @@ public class DatabaseHelper extends OrmLiteSqliteOpenHelper {
 
 	private Dao<ORMNews, Integer> newsDao;
 	private Dao<ORMAuthor, Integer> authorDao;
+	private Dao<ORMContent, Integer> contentDao;
+	private Dao<ORMAudios, Integer> audiosDao;
+	private Dao<ORMVideos, Integer> videosDao;
+	private Dao<ORMLinks, Integer> linksDao;
+	private Dao<ORMImages, Integer> imagesDao;
 
 	public DatabaseHelper(Context context) {
 		super(context, DATABASE_NAME, null, DATABASE_VERSION, R.raw.ormlite_config);
@@ -46,7 +56,12 @@ public class DatabaseHelper extends OrmLiteSqliteOpenHelper {
 			// Create tables. This onCreate() method will be invoked only once of the application life time i.e. the first time when the application starts.
 			TableUtils.createTable(connectionSource, ORMNews.class);
 			TableUtils.createTable(connectionSource, ORMAuthor.class);
-			
+			TableUtils.createTable(connectionSource, ORMContent.class);
+			TableUtils.createTable(connectionSource, ORMAudios.class);
+			TableUtils.createTable(connectionSource, ORMVideos.class);
+			TableUtils.createTable(connectionSource, ORMLinks.class);
+			TableUtils.createTable(connectionSource, ORMImages.class);
+
 		} catch (SQLException e) {
 			Log.e(DatabaseHelper.class.getName(), "Unable to create datbases", e);
 		}
@@ -62,6 +77,11 @@ public class DatabaseHelper extends OrmLiteSqliteOpenHelper {
 			
 			TableUtils.dropTable(connectionSource, ORMNews.class, true);
 			TableUtils.dropTable(connectionSource, ORMAuthor.class, true);
+			TableUtils.dropTable(connectionSource, ORMContent.class, true);
+			TableUtils.dropTable(connectionSource, ORMAudios.class, true);
+			TableUtils.dropTable(connectionSource, ORMVideos.class, true);
+			TableUtils.dropTable(connectionSource, ORMLinks.class, true);
+			TableUtils.dropTable(connectionSource, ORMImages.class, true);
 			onCreate(sqliteDatabase, connectionSource);
 			
 		} catch (SQLException e) {
@@ -85,5 +105,35 @@ public class DatabaseHelper extends OrmLiteSqliteOpenHelper {
             authorDao = getDao(ORMAuthor.class);
 		}
 		return authorDao;
+	}
+	public Dao<ORMContent, Integer> getContentDao() throws SQLException {
+		if (contentDao == null) {
+			contentDao = getDao(ORMContent.class);
+		}
+		return contentDao;
+	}
+	public Dao<ORMImages, Integer> getImagesDao() throws SQLException {
+		if (imagesDao == null) {
+			imagesDao = getDao(ORMImages.class);
+		}
+		return imagesDao;
+	}
+	public Dao<ORMVideos, Integer> getVideosDao() throws SQLException {
+		if (videosDao == null) {
+			videosDao = getDao(ORMVideos.class);
+		}
+		return videosDao;
+	}
+	public Dao<ORMLinks, Integer> getLinksDao() throws SQLException {
+		if (linksDao == null) {
+			linksDao = getDao(ORMLinks.class);
+		}
+		return linksDao;
+	}
+	public Dao<ORMAudios, Integer> getAudiosDao() throws SQLException {
+		if (audiosDao == null) {
+			audiosDao = getDao(ORMAudios.class);
+		}
+		return audiosDao;
 	}
 }

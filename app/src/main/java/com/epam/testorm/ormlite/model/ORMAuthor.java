@@ -24,6 +24,7 @@ public class ORMAuthor {
 
     @DatabaseField
     private String displayName;
+    public static String DISPLAY_NAME = "displayName";
 
     @DatabaseField
     private String avatar;

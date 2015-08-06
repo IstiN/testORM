@@ -93,7 +93,7 @@ public class MainActivity extends ActionBarActivity {
         final long now = System.currentTimeMillis();
         ListAdapter fullAdapter = cacheManager.getFilteredAdapter();
         final long time = System.currentTimeMillis() - now;
-        log("Read filtered " + time + "ms, count = " + fullAdapter.getCount());
+        log("Read filtered " + time + "ms, count = " + (fullAdapter == null ? 0 : fullAdapter.getCount()));
         listView.setAdapter(fullAdapter);
     }
 
@@ -101,7 +101,7 @@ public class MainActivity extends ActionBarActivity {
         final long now = System.currentTimeMillis();
         ListAdapter fullAdapter = cacheManager.getImagesOnlyAdapter();
         final long time = System.currentTimeMillis() - now;
-        log("Read images " + time + "ms, count = " + fullAdapter.getCount());
+        log("Read images " + time + "ms, count = " + (fullAdapter == null ? 0 : fullAdapter.getCount()));
         listView.setAdapter(fullAdapter);
     }
 
@@ -109,7 +109,7 @@ public class MainActivity extends ActionBarActivity {
         final long now = System.currentTimeMillis();
         ListAdapter fullAdapter = cacheManager.getFullAdapter();
         final long time = System.currentTimeMillis() - now;
-        log("Read all " + time + "ms, count = " + fullAdapter.getCount());
+        log("Read all " + time + "ms, count = " + (fullAdapter == null ? 0 : fullAdapter.getCount()));
         listView.setAdapter(fullAdapter);
     }
 
