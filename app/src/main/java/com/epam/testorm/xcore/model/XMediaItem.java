@@ -3,10 +3,10 @@ package com.epam.testorm.xcore.model;
 import android.content.ContentValues;
 import android.provider.BaseColumns;
 
-import com.epam.testorm.db.annotation.dbString;
 
 import by.istin.android.xcore.annotations.dbIndex;
 import by.istin.android.xcore.annotations.dbLong;
+import by.istin.android.xcore.annotations.dbString;
 import by.istin.android.xcore.db.IDBConnection;
 import by.istin.android.xcore.db.entity.IGenerateID;
 import by.istin.android.xcore.db.impl.DBHelper;
