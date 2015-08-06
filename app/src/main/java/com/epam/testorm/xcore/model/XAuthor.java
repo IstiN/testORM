@@ -3,6 +3,8 @@ package com.epam.testorm.xcore.model;
 import android.content.ContentValues;
 import android.provider.BaseColumns;
 
+import com.google.gson.annotations.SerializedName;
+
 import by.istin.android.xcore.annotations.dbIndex;
 import by.istin.android.xcore.annotations.dbLong;
 import by.istin.android.xcore.annotations.dbString;
@@ -21,15 +23,18 @@ public class XAuthor  implements BaseColumns, IBeforeUpdate, IGenerateID {
     public static String NETWORK = "network";
 
     @dbString
+    @SerializedName("id")
     public static String USER_ID = "user_id";
 
     @dbString
     public static String DISPLAY_NAME = "displayName";
 
     @dbString
+    @SerializedName("avatar:url")
     public static String AVATAR = "avatar";
 
     @dbString
+    @SerializedName("profile:url")
     public static String PROFILE = "profile";
 
     @dbLong

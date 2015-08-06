@@ -100,6 +100,7 @@ public class ORMManager implements ICacheManager {
                         ORMNews ormNews = new ORMNews();
                         ormNews.setAuthor(ormAuthor);
                         ormNews.setTime(item.getTimestamp());
+                        ormNews.setUrl(item.getLink());
                         ormNews.setContent(ormContent);
                         newsDao.createOrUpdate(ormNews);
 

@@ -4,7 +4,11 @@ import android.content.Context;
 
 import com.epam.testorm.xcore.model.XAuthor;
 import com.epam.testorm.xcore.model.XContent;
+import com.epam.testorm.xcore.model.XMediaAudios;
+import com.epam.testorm.xcore.model.XMediaImages;
 import com.epam.testorm.xcore.model.XMediaItem;
+import com.epam.testorm.xcore.model.XMediaLinks;
+import com.epam.testorm.xcore.model.XMediaVideos;
 import com.epam.testorm.xcore.model.XNews;
 
 import by.istin.android.xcore.XCoreHelper;
@@ -20,10 +24,10 @@ public class Module extends XCoreHelper.BaseModule {
             XAuthor.class,
             XNews.class,
             XMediaItem.class,
-//            XMediaImages.class,
-//            XMediaAudios.class,
-//            XMediaLinks.class,
-//            XMediaVideos.class
+            XMediaImages.class,
+            XMediaAudios.class,
+            XMediaLinks.class,
+            XMediaVideos.class,
     };
 
     @Override

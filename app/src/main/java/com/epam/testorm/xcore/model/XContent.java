@@ -3,6 +3,10 @@ package com.epam.testorm.xcore.model;
 import android.content.ContentValues;
 import android.provider.BaseColumns;
 
+import com.google.gson.annotations.SerializedName;
+
+import by.istin.android.xcore.annotations.dbEntities;
+import by.istin.android.xcore.annotations.dbEntity;
 import by.istin.android.xcore.annotations.dbIndex;
 import by.istin.android.xcore.annotations.dbLong;
 import by.istin.android.xcore.annotations.dbString;
@@ -27,9 +31,9 @@ public class XContent implements BaseColumns, IBeforeUpdate, IGenerateID {
     @dbString
     public static String TITLE = "title";
 
-//    @dbEntities(clazz = XMediaImages.class)
-//    @SerializedName("media:photos")
-//    public static String PHOTOS = "photos";
+    @dbEntities(clazz = XMediaImages.class)
+    @SerializedName("media:photos")
+    public static String PHOTOS = "photos";
 //
 //    @dbEntities(clazz = XMediaImages.class)
 //    @SerializedName("media:links")

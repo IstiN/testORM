@@ -68,4 +68,12 @@ public class ORMNews {
     public void setContent(ORMContent content) {
         this.content = content;
     }
+
+    public String getUrl() {
+        return url;
+    }
+
+    public void setUrl(String url) {
+        this.url = url;
+    }
 }

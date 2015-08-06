@@ -140,7 +140,7 @@ public abstract class AbstractValuesAdapter implements JsonDeserializer<ContentV
             if (jsonValue.isJsonArray()) {
                 JsonArray jsonArray = jsonValue.getAsJsonArray();
                 proceedSubEntities(type, jsonDeserializationContext, contentValues, field, jsonArray);
-            } else {
+            } else if (jsonValue.isJsonObject()) {
                 Class<?> clazz = field.getDbEntitiesClass();
                 JsonObject subEntityJsonObject = jsonValue.getAsJsonObject();
                 proceedSubEntity(type, jsonDeserializationContext, contentValues, field, clazz, subEntityJsonObject);
