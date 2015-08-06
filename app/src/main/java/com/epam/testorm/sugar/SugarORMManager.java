@@ -29,6 +29,7 @@ import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
 import com.google.gson.annotations.Expose;
 import com.nostra13.universalimageloader.core.ImageLoader;
+import com.orm.SugarContext;
 import com.orm.SugarRecord;
 
 import java.util.ArrayList;
@@ -44,6 +45,7 @@ public class SugarORMManager implements ICacheManager {
     private Activity mActivity;
 
     public SugarORMManager(Activity activity) {
+        SugarContext.init(activity.getApplicationContext());
         mActivity = activity;
     }
 

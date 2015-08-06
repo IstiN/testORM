@@ -33,13 +33,17 @@ android {
             flavorDimension "orm"
             buildConfigField "String", "ORM", '"xcore"';
         }
-        "SUGAR" {
+        "SugarOrm" {
             flavorDimension "orm"
             buildConfigField "String", "ORM", '"sugar"';
         }
         "ORMLite" {
             flavorDimension "orm"
             buildConfigField "String", "ORM", '"ORMLite"';
+        }
+        "GreenDao" {
+            flavorDimension "orm"
+            buildConfigField "String", "ORM", '"GreenDao"';
         }
     }
 }
@@ -51,5 +55,7 @@ dependencies {
     compile 'com.android.support:recyclerview-v7:22.2.0'
     compile 'io.realm:realm-android:0.82.0'
     compile 'com.google.guava:guava:18.0'
+    compile 'de.greenrobot:greendao:2.0.0'
+    compile 'de.greenrobot:greendao-generator:2.0.0'
     compile 'com.nostra13.universalimageloader:universal-image-loader:1.9.3'
 }

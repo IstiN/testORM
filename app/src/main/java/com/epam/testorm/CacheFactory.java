@@ -3,6 +3,7 @@ package com.epam.testorm;
 import android.app.Activity;
 
 import com.epam.testorm.db.StreamDetailsManager;
+import com.epam.testorm.greenDao.GreenDaoManager;
 import com.epam.testorm.ormlite.ORMManager;
 import com.epam.testorm.realm.RealmManager;
 import com.epam.testorm.sugar.SugarORMManager;
@@ -25,6 +26,9 @@ public class CacheFactory {
         }
         if (BuildConfig.ORM.equals("ORMLite")) {
             return new ORMManager(context);
+        }
+        if (BuildConfig.ORM.equals("GreenDao")) {
+            return new GreenDaoManager(context);
         }
         return new StreamDetailsManager(context);
     }

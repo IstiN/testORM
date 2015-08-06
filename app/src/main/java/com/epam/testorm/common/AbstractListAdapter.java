@@ -8,6 +8,7 @@ import android.widget.ArrayAdapter;
 import android.widget.ImageView;
 
 import java.util.ArrayList;
+import java.util.List;
 
 /**
  * Created by Mike on 15.08.13.
@@ -15,7 +16,7 @@ import java.util.ArrayList;
 public abstract class AbstractListAdapter<T> extends ArrayAdapter<T> {
 
     private Context mContext;
-    private ArrayList<T> mItems;
+    private List<T> mItems;
 
     private int mLayout;
 
@@ -23,7 +24,7 @@ public abstract class AbstractListAdapter<T> extends ArrayAdapter<T> {
         super(context, textViewResourceId);
     }
 
-    public AbstractListAdapter(Context context, int layout, ArrayList<T> objects) {
+    public AbstractListAdapter(Context context, int layout, List<T> objects) {
         super(context, layout, 0, objects);
         this.mLayout = layout;
         this.mItems = objects;
@@ -97,7 +98,7 @@ public abstract class AbstractListAdapter<T> extends ArrayAdapter<T> {
         notifyDataSetChanged();
     }
 
-    public ArrayList<T> getItems() {
+    public List<T> getItems() {
         return mItems;
     }
 
