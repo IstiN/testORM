@@ -91,26 +91,80 @@ public class MainActivity extends ActionBarActivity {
 
     private void fetchFiltered() {
         final long now = System.currentTimeMillis();
-        final ListAdapter fullAdapter = cacheManager.getFilteredAdapter();
-        final long time = System.currentTimeMillis() - now;
-        log("Read filtered " + time + "ms, count = " + fullAdapter.getCount());
-        listView.setAdapter(fullAdapter);
+        if (BuildConfig.ORM.equals("realm")) {
+            final ListAdapter fullAdapter = cacheManager.getFilteredAdapter();
+            final long time = System.currentTimeMillis() - now;
+            log("Read filtered " + time + "ms, count = " + fullAdapter.getCount());
+            listView.setAdapter(fullAdapter);
+        } else {
+            new Thread(new Runnable() {
+                @Override
+                public void run() {
+
+                    final ListAdapter fullAdapter = cacheManager.getFilteredAdapter();
+                    final long time = System.currentTimeMillis() - now;
+                    runOnUiThread(new Runnable() {
+                        @Override
+                        public void run() {
+                            log("Read filtered " + time + "ms, count = " + fullAdapter.getCount());
+                            listView.setAdapter(fullAdapter);
+                        }
+                    });
+                }
+            }).start();
+        }
     }
 
     private void fetchImages() {
         final long now = System.currentTimeMillis();
-        final ListAdapter fullAdapter = cacheManager.getImagesOnlyAdapter();
-        final long time = System.currentTimeMillis() - now;
-        log("Read images " + time + "ms, count = " + fullAdapter.getCount());
-        listView.setAdapter(fullAdapter);
+        if (BuildConfig.ORM.equals("realm")) {
+            final ListAdapter fullAdapter = cacheManager.getImagesOnlyAdapter();
+            final long time = System.currentTimeMillis() - now;
+            log("Read filtered " + time + "ms, count = " + fullAdapter.getCount());
+            listView.setAdapter(fullAdapter);
+        } else {
+            new Thread(new Runnable() {
+                @Override
+                public void run() {
+
+                    final ListAdapter fullAdapter = cacheManager.getImagesOnlyAdapter();
+                    final long time = System.currentTimeMillis() - now;
+                    runOnUiThread(new Runnable() {
+                        @Override
+                        public void run() {
+                            log("Read filtered " + time + "ms, count = " + fullAdapter.getCount());
+                            listView.setAdapter(fullAdapter);
+                        }
+                    });
+                }
+            }).start();
+        }
     }
 
     private void fetchAll() {
         final long now = System.currentTimeMillis();
-        final ListAdapter fullAdapter = cacheManager.getFullAdapter();
-        final long time = System.currentTimeMillis() - now;
-        log("Read all " + time + "ms, count = " + fullAdapter.getCount());
-        listView.setAdapter(fullAdapter);
+        if (BuildConfig.ORM.equals("realm")) {
+            final ListAdapter fullAdapter = cacheManager.getFullAdapter();
+            final long time = System.currentTimeMillis() - now;
+            log("Read all " + time + "ms, count = " + fullAdapter.getCount());
+            listView.setAdapter(fullAdapter);
+        } else {
+            new Thread(new Runnable() {
+                @Override
+                public void run() {
+
+                    final ListAdapter fullAdapter = cacheManager.getFullAdapter();
+                    final long time = System.currentTimeMillis() - now;
+                    runOnUiThread(new Runnable() {
+                        @Override
+                        public void run() {
+                            log("Read filtered " + time + "ms, count = " + fullAdapter.getCount());
+                            listView.setAdapter(fullAdapter);
+                        }
+                    });
+                }
+            }).start();
+        }
     }
 
     ProgressDialog dialog;
