@@ -45,17 +45,16 @@ public class SugarORMManager implements ICacheManager {
     private Activity mActivity;
 
     public SugarORMManager(Activity activity) {
-        SugarContext.init(activity.getApplicationContext());
         mActivity = activity;
     }
 
     @Override
     public void processFeed(String string) {
         SugarRecord.deleteAll(NewsItemSugar.class);
-//        manual(string);
-        gsonOnly(string);
+        manual(string);
     }
 
+    //doesn't work as we need to simplify model
     private void gsonOnly(String string) {
         Gson gson = new GsonBuilder()
                 .setExclusionStrategies(new ExclusionStrategy() {
@@ -90,23 +89,15 @@ public class SugarORMManager implements ICacheManager {
         NewsItemSugar newsItem = new NewsItemSugar();
         newsItem.setId(item.getTimestamp());
         newsItem.setTimestamp(item.getTimestamp());
-        MediaItemSugar link = new MediaItemSugar();
-        link.setUrl(item.getLink());
-        newsItem.setLink(link);
+        newsItem.setLink(item.getLink());
 
         AuthorSugar author = new AuthorSugar();
         author.setUserId(item.getAuthor().getId());
         author.setRef(item.getAuthor().getRef());
         author.setNetwork(item.getAuthor().getNetwork());
         author.setDisplayName(item.getAuthor().getDisplayName());
-
-        MediaItemSugar avatar = new MediaItemSugar();
-        avatar.setUrl(checkNull(item.getAuthor().getAvatar()));
-        author.setAvatar(avatar);
-
-        MediaItemSugar profile = new MediaItemSugar();
-        profile.setUrl(checkNull(item.getAuthor().getProfileUrl()));
-        author.setProfile(profile);
+        author.setAvatar(checkNull(item.getAuthor().getAvatar()));
+        author.setProfile(checkNull(item.getAuthor().getProfileUrl()));
         newsItem.setAuthor(author);
 
         ContentSugar content = new ContentSugar();
@@ -160,22 +151,22 @@ public class SugarORMManager implements ICacheManager {
         return audiosSugarList;
     }
 
-
     @Override
     public ListAdapter getFullAdapter() {
         List<NewsItemSugar> all = NewsItemSugar.find(NewsItemSugar.class, null, null);
-
         return createAdapter((ArrayList)all);
     }
 
     @Override
     public ListAdapter getFilteredAdapter() {
-        return null;
+        List<NewsItemSugar> all = NewsItemSugar.find(NewsItemSugar.class, null, null);
+        return createAdapter((ArrayList)all);
     }
 
     @Override
     public ListAdapter getImagesOnlyAdapter() {
-        return null;
+        List<NewsItemSugar> all = NewsItemSugar.find(NewsItemSugar.class, null, null);
+        return createAdapter((ArrayList)all);
     }
 
     @NonNull
@@ -221,7 +212,7 @@ public class SugarORMManager implements ICacheManager {
         }
         ImageLoader.getInstance().displayImage(posterUrl, posterView);
         ImageView avatarView = (ImageView) convertView.findViewById(R.id.avatar);
-        ImageLoader.getInstance().displayImage(channel.getAuthor().getAvatar().getUrl(), avatarView);
+        ImageLoader.getInstance().displayImage(channel.getAuthor().getAvatar(), avatarView);
         setText(convertView, R.id.title, channel.getAuthor().getDisplayName());
         setText(convertView, R.id.desc, StringUtils.isEmpty(channel.getContent().getTitle()) ? channel.getContent().getDescription() : channel.getContent().getTitle());
 

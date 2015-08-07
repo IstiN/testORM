@@ -56,12 +56,10 @@ public class StreamDetailsManager implements ICacheManager {
             News.class,
             AuthorDb.class,
             ContentDb.class,
-            MediaItemDb.class,
             MediaAudios.class,
             MediaVideos.class,
             MediaImages.class,
             MediaLinks.class,
-
     };
 
     public StreamDetailsManager(Activity activity) {
@@ -72,18 +70,10 @@ public class StreamDetailsManager implements ICacheManager {
 
     public void clearCache() {
         SQLiteDatabase db = mDBHelper.getWritableDatabase();
-        for (Class table : tables ) {
+        for (Class table : tables) {
             db.delete(mDBHelper.getTableName(table), null, null);
         }
     }
-
-    public static void closeCursor(Cursor cursor) {
-        Log.d(TAG, "closeCursor");
-        if (Build.VERSION.SDK_INT < 11 && cursor != null && !cursor.isClosed()) {
-            cursor.close();
-        }
-    }
-
 
     @Override
     public void processFeed(String feed) {
@@ -111,8 +101,9 @@ public class StreamDetailsManager implements ICacheManager {
         long newsId = HashUtils.generateId(time, item.getLink());
         news.put(DBHelper.ID_NAME, newsId);
         news.put(News.TIMESTAMP, time);
+        news.put(News.URL, item.getLink());
         Author itemAuthor = item.getAuthor();  // process author
-        if (itemAuthor !=null) {
+        if (itemAuthor != null) {
             ContentValues author = new ContentValues();
             author.put(AuthorDb.USER_ID, itemAuthor.getId());
             author.put(AuthorDb.AVATAR, itemAuthor.getAvatar());
@@ -125,84 +116,80 @@ public class StreamDetailsManager implements ICacheManager {
             news.put(News.AUTHOR, itemAuthor.getRef());
         }
         com.epam.testorm.gson.MediaItem itemLink = item.getLinkItem();  // process author
-        if (itemLink !=null) {
-            ContentValues link = new ContentValues();
-            link.put(MediaItemDb.URL, itemLink.getUrl());
-            long generateId = HashUtils.generateId(itemLink.getUrl());
-            link.put(DBHelper.ID_NAME, generateId);
-            long l = db.insertWithOnConflict(tablesNames.get(MediaItemDb.class), null, link, SQLiteDatabase.CONFLICT_REPLACE);
-            news.put(News.URL, generateId);
-        }
         ContentValues content = new ContentValues();
         content.put(ContentDb.COMMENT, item.getContentComment());
         content.put(ContentDb.DESCRIPTION, item.getContentDesc());
         content.put(ContentDb.TITLE, item.getContentTitle());
-        long generateId = HashUtils.generateId(item.getContentTitle(), item.getContentDesc(), item.getContentComment());
-        content.put(DBHelper.ID_NAME, generateId);
+        long contentId = HashUtils.generateId(item.getContentTitle(), item.getContentDesc(), item.getContentComment());
+        content.put(DBHelper.ID_NAME, contentId);
         long l = db.insertWithOnConflict(tablesNames.get(ContentDb.class), null, content, SQLiteDatabase.CONFLICT_REPLACE);
-        news.put(News.CONTENT, generateId);
+        news.put(News.CONTENT, contentId);
         l = db.insertWithOnConflict(tablesNames.get(News.class), null, news, SQLiteDatabase.CONFLICT_REPLACE);
         Media contentMedia = item.getContentMedia();
         if (contentMedia != null) {
-            l = processMedia(db, contentMedia, newsId);
+            l = processMedia(db, contentMedia, contentId);
         }
 
         return l;
     }
 
-    private long processMedia(SQLiteDatabase db, Media contentMedia, long newsId) {
+    private long processMedia(SQLiteDatabase db, Media contentMedia, long contentId) {
         long l = 0;
-        ArrayList<com.epam.testorm.gson.MediaItem> audios = contentMedia.getAudios();
+        ArrayList<MediaItem> audios = contentMedia.getAudios();
         if (audios != null) {
-            for (com.epam.testorm.gson.MediaItem item : audios) {
-                l = addRecord(db, newsId, item, MediaAudios.class);
+            for (MediaItem item : audios) {
+                l = addRecord(db, contentId, item, MediaAudios.class);
             }
         }
-        ArrayList<com.epam.testorm.gson.MediaItem> videos = contentMedia.getVideos();
+        ArrayList<MediaItem> videos = contentMedia.getVideos();
         if (videos != null) {
-            for (com.epam.testorm.gson.MediaItem item : videos) {
-                l = addRecord(db, newsId, item, MediaVideos.class);
+            for (MediaItem item : videos) {
+                l = addRecord(db, contentId, item, MediaVideos.class);
             }
         }
-        ArrayList<com.epam.testorm.gson.MediaItem> photos = contentMedia.getPhotos();
+        ArrayList<MediaItem> photos = contentMedia.getPhotos();
         if (photos != null) {
-            for (com.epam.testorm.gson.MediaItem item : photos) {
-                l = addRecord(db, newsId, item, MediaImages.class);
+            for (MediaItem item : photos) {
+                l = addRecord(db, contentId, item, MediaImages.class);
             }
         }
-        ArrayList<com.epam.testorm.gson.MediaItem> links = contentMedia.getLinks();
+        ArrayList<MediaItem> links = contentMedia.getLinks();
         if (links != null) {
-            for (com.epam.testorm.gson.MediaItem item : links) {
-                l = addRecord(db, newsId, item, MediaLinks.class);
+            for (MediaItem item : links) {
+                l = addRecord(db, contentId, item, MediaLinks.class);
             }
         }
         return l;
     }
 
-    private long addRecord(SQLiteDatabase db, long newsId, com.epam.testorm.gson.MediaItem item, Class recordClass) {
+    private long addRecord(SQLiteDatabase db, long contentId, MediaItem item, Class<? extends ICache> recordClass) {
         ContentValues media = new ContentValues();
         media.put(MediaItemDb.DESCRIPTION, item.getDescription());
         media.put(MediaItemDb.URL, item.getUrl());
         media.put(MediaItemDb.IMAGE, item.getImage() == null ? null : item.getImage().getUrl());
         media.put(MediaItemDb.ORIGINAL, item.getOriginalImage());
-        media.put(MediaItemDb.THUMBNAIL, item.getThumbnailUrl() == null? null : item.getThumbnailUrl().getUrl());
+        media.put(MediaItemDb.THUMBNAIL, item.getThumbnailUrl() == null ? null : item.getThumbnailUrl().getUrl());
         media.put(MediaItemDb.TITLE, item.getTitle());
         long generateId = HashUtils.generateId(item.getUrl());
         media.put(DBHelper.ID_NAME, generateId);
-        ContentValues record = new ContentValues();
-        record.put(DBHelper.ID_NAME, HashUtils.generateId(newsId, generateId));
-        record.put(MediaAudios.newsId, newsId);
-        record.put(MediaAudios.itemId, generateId);
-        long l = db.insertWithOnConflict(tablesNames.get(MediaItemDb.class), null, media, SQLiteDatabase.CONFLICT_REPLACE);
-        l = db.insertWithOnConflict(tablesNames.get(recordClass), null, record, SQLiteDatabase.CONFLICT_REPLACE);
-        return l;
+        media.put(MediaItemDb.CONTENT_ID, contentId);
+        return db.insertWithOnConflict(tablesNames.get(recordClass), null, media, SQLiteDatabase.CONFLICT_REPLACE);
     }
 
     private Long getLong(Cursor cursor, String column) {
+        int columnIndex = cursor.getColumnIndex(column);
+        if (columnIndex < 0) {
+            return null;
+        }
         return cursor.getLong(cursor.getColumnIndex(column));
     }
+
     private String getString(Cursor cursor, String column) {
-        return cursor.getString(cursor.getColumnIndex(column));
+        int columnIndex = cursor.getColumnIndex(column);
+        if (columnIndex < 0) {
+            return null;
+        }
+        return cursor.getString(columnIndex);
     }
 
     @Override
@@ -215,7 +202,9 @@ public class StreamDetailsManager implements ICacheManager {
             StreamDetails detail = getStreamDetails(db, news);
             list.add(detail);
         }
-        closeCursor(news);
+        news.close();
+        db.setTransactionSuccessful();
+        db.endTransaction();
         return createAdapter(list);
     }
 
@@ -225,11 +214,8 @@ public class StreamDetailsManager implements ICacheManager {
         Long time = getLong(news, News.TIMESTAMP);
         Long authorId = getLong(news, News.AUTHOR);
         Long contentId = getLong(news, News.CONTENT);
-        Long urlId = getLong(news, News.URL);
-        Cursor urlCursor = db.query(tablesNames.get(MediaItemDb.class), null, DBHelper.ID_NAME + " = ?", new String[]{urlId.toString()}, null, null, null);
-        urlCursor.moveToFirst();
-        MediaItem url = new MediaItem(getString(urlCursor, MediaItemDb.URL));
-        closeCursor(urlCursor);
+        String link = getString(news, News.URL);
+        MediaItem url = new MediaItem(link);
         //process author
         Cursor authorCursor = db.query(tablesNames.get(AuthorDb.class), null, DBHelper.ID_NAME + " = ?", new String[]{authorId.toString()}, null, null, null);
         authorCursor.moveToFirst();
@@ -242,16 +228,17 @@ public class StreamDetailsManager implements ICacheManager {
         MediaItem authorAvatar = new MediaItem(avatar);
         MediaItem authorProfile = new MediaItem(profile);
         Author author = new Author(network, userId, displayName, authorAvatar, authorProfile, ref);
-        closeCursor(authorCursor);
+        authorCursor.close();
         //process content
         Cursor contentCursor = db.query(tablesNames.get(ContentDb.class), null, DBHelper.ID_NAME + " = ?", new String[]{contentId.toString()}, null, null, null);
         contentCursor.moveToFirst();
         String comment = getString(contentCursor, ContentDb.COMMENT);
         String descr = getString(contentCursor, ContentDb.DESCRIPTION);
         String title = getString(contentCursor, ContentDb.TITLE);
-        Media media = getMedia(db,id);
+        Long contentID = getLong(contentCursor, DBHelper.ID_NAME);
+        Media media = getMedia(db, contentID);
         Content content = new Content(media, descr, title, comment);
-        closeCursor(contentCursor);
+        contentCursor.close();
         return new StreamDetails(author, content, time, url);
     }
 
@@ -260,33 +247,39 @@ public class StreamDetailsManager implements ICacheManager {
         ArrayList<MediaItem> audios = new ArrayList<>();
         ArrayList<MediaItem> links = new ArrayList<>();
         ArrayList<MediaItem> videos = new ArrayList<>();
-        Cursor audiosCursor = db.query(tablesNames.get(MediaAudios.class), null, MediaAudios.newsId + " = ?", new String[]{id.toString()}, null, null, null);
-        while (audiosCursor.moveToNext()) {
-            audios.add(getMediaItem(db, getLong(audiosCursor, MediaAudios.itemId)));
+        Cursor audiosCursor = db.query(tablesNames.get(MediaAudios.class), null, MediaAudios.CONTENT_ID + " = ?", new String[]{id.toString()}, null, null, null);
+        if (audiosCursor.getCount() > 0) {
+            while (audiosCursor.moveToNext()) {
+                audios.add(getMediaItem(audiosCursor));
+            }
         }
-        closeCursor(audiosCursor);
-        Cursor videosCursor = db.query(tablesNames.get(MediaVideos.class), null, MediaVideos.newsId + " = ?", new String[]{id.toString()}, null, null, null);
-        while (videosCursor.moveToNext()) {
-            videos.add(getMediaItem(db, getLong(videosCursor, MediaVideos.itemId)));
+        audiosCursor.close();
+        Cursor videosCursor = db.query(tablesNames.get(MediaVideos.class), null, MediaVideos.CONTENT_ID + " = ?", new String[]{id.toString()}, null, null, null);
+        if (videosCursor.getCount() > 0) {
+            while (videosCursor.moveToNext()) {
+                videos.add(getMediaItem(videosCursor));
+            }
         }
-        closeCursor(videosCursor);
-        Cursor imagesCursor = db.query(tablesNames.get(MediaImages.class), null, MediaImages.newsId + " = ?", new String[]{id.toString()}, null, null, null);
-        while (imagesCursor.moveToNext()) {
-            images.add(getMediaItem(db, getLong(imagesCursor, MediaImages.itemId)));
+        videosCursor.close();
+        Cursor imagesCursor = db.query(tablesNames.get(MediaImages.class), null, MediaImages.CONTENT_ID + " = ?", new String[]{id.toString()}, null, null, null);
+        if (imagesCursor.getCount() > 0) {
+            while (imagesCursor.moveToNext()) {
+                images.add(getMediaItem(imagesCursor));
+            }
         }
-        closeCursor(imagesCursor);
-        Cursor linksCursor = db.query(tablesNames.get(MediaLinks.class), null, MediaLinks.newsId + " = ?", new String[]{id.toString()}, null, null, null);
-        while (linksCursor.moveToNext()) {
-            links.add(getMediaItem(db, getLong(linksCursor, MediaLinks.itemId)));
+        imagesCursor.close();
+        Cursor linksCursor = db.query(tablesNames.get(MediaLinks.class), null, MediaLinks.CONTENT_ID + " = ?", new String[]{id.toString()}, null, null, null);
+        if (linksCursor.getCount() > 0) {
+            while (linksCursor.moveToNext()) {
+                links.add(getMediaItem(linksCursor));
+            }
         }
-        closeCursor(linksCursor);
+        linksCursor.close();
         return new Media(images, links, audios, videos);
     }
 
     @NonNull
-    private MediaItem getMediaItem(SQLiteDatabase db, Long id) {
-        Cursor cursor = db.query(tablesNames.get(MediaItemDb.class), null, DBHelper.ID_NAME + " = ?", new String[]{id.toString()}, null, null, null);
-        cursor.moveToFirst();
+    private MediaItem getMediaItem(Cursor cursor) {
         String url = getString(cursor, MediaItemDb.URL);
         String desc = getString(cursor, MediaItemDb.DESCRIPTION);
         String image = getString(cursor, MediaItemDb.IMAGE);
@@ -301,7 +294,6 @@ public class StreamDetailsManager implements ICacheManager {
         if (!TextUtils.isEmpty(thumbnail)) {
             thumbItem = new MediaItem(thumbnail);
         }
-        closeCursor(cursor);
         return new MediaItem(url, title, imageItem, original, thumbItem, desc);
     }
 
@@ -322,7 +314,9 @@ public class StreamDetailsManager implements ICacheManager {
             StreamDetails detail = getStreamDetails(db, news);
             list.add(detail);
         }
-        closeCursor(news);
+        news.close();
+        db.setTransactionSuccessful();
+        db.endTransaction();
         return createAdapter(list);
 
     }
@@ -335,15 +329,17 @@ public class StreamDetailsManager implements ICacheManager {
         Cursor query = db.query(tablesNames.get(MediaImages.class), null, null, null, null, null, null);
         Set<Long> ids = new HashSet<>();
         while (query.moveToNext()) {
-            ids.add(getLong(query, MediaImages.newsId));
+            ids.add(getLong(query, MediaImages.CONTENT_ID));
         }
         String join = "\"" + TextUtils.join("\",\"", ids) + "\"";
-        Cursor news = db.rawQuery("SELECT * FROM News WHERE _ID IN ("+join+") ORDER BY time", null);
+        Cursor news = db.rawQuery("SELECT * FROM News WHERE " + News.CONTENT + " IN (" + join + ") ORDER BY time", null);
         while (news.moveToNext()) {
             StreamDetails detail = getStreamDetails(db, news);
             list.add(detail);
         }
-        closeCursor(news);
+        news.close();
+        db.setTransactionSuccessful();
+        db.endTransaction();
         return createAdapter(list);
     }
 

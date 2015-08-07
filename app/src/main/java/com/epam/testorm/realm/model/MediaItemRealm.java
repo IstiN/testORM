@@ -10,16 +10,16 @@ public class MediaItemRealm extends RealmObject {
     private String url;
     private String title;
     private String description;
-    private MediaItemRealm image;
-    private MediaItemRealm thumbnail;
+    private String image;
+    private String thumbnail;
 
     public MediaItemRealm() {
     }
 
-    public MediaItemRealm(String url, String title, MediaItemRealm image) {
+    public MediaItemRealm(String url, String title) {
         this.url = url;
         this.title = title;
-        this.image = image;
+
     }
 
     public String getUrl() {
@@ -38,11 +38,11 @@ public class MediaItemRealm extends RealmObject {
         this.title = title;
     }
 
-    public MediaItemRealm getImage() {
+    public String getImage() {
         return image;
     }
 
-    public void setImage(MediaItemRealm image) {
+    public void setImage(String image) {
         this.image = image;
     }
 
@@ -50,7 +50,7 @@ public class MediaItemRealm extends RealmObject {
         return description;
     }
 
-    public MediaItemRealm getThumbnail() {
+    public String getThumbnail() {
         return thumbnail;
     }
 
@@ -58,7 +58,7 @@ public class MediaItemRealm extends RealmObject {
         this.description = description;
     }
 
-    public void setThumbnail(MediaItemRealm thumbnail) {
+    public void setThumbnail(String thumbnail) {
         this.thumbnail = thumbnail;
     }
 }

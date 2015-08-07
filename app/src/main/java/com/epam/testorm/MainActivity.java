@@ -90,57 +90,27 @@ public class MainActivity extends ActionBarActivity {
     }
 
     private void fetchFiltered() {
-        new Thread(new Runnable() {
-            @Override
-            public void run() {
-                final long now = System.currentTimeMillis();
-                final ListAdapter fullAdapter = cacheManager.getFilteredAdapter();
-                final long time = System.currentTimeMillis() - now;
-                runOnUiThread(new Runnable() {
-                    @Override
-                    public void run() {
-                        log("Read filtered " + time + "ms, count = " + fullAdapter.getCount());
-                        listView.setAdapter(fullAdapter);
-                    }
-                });
-            }
-        }).start();
+        final long now = System.currentTimeMillis();
+        final ListAdapter fullAdapter = cacheManager.getFilteredAdapter();
+        final long time = System.currentTimeMillis() - now;
+        log("Read filtered " + time + "ms, count = " + fullAdapter.getCount());
+        listView.setAdapter(fullAdapter);
     }
 
     private void fetchImages() {
-        new Thread(new Runnable() {
-            @Override
-            public void run() {
-                final long now = System.currentTimeMillis();
-                final ListAdapter fullAdapter = cacheManager.getImagesOnlyAdapter();
-                final long time = System.currentTimeMillis() - now;
-                runOnUiThread(new Runnable() {
-                    @Override
-                    public void run() {
-                        log("Read images " + time + "ms, count = " + fullAdapter.getCount());
-                        listView.setAdapter(fullAdapter);
-                    }
-                });
-            }
-        }).start();
+        final long now = System.currentTimeMillis();
+        final ListAdapter fullAdapter = cacheManager.getImagesOnlyAdapter();
+        final long time = System.currentTimeMillis() - now;
+        log("Read images " + time + "ms, count = " + fullAdapter.getCount());
+        listView.setAdapter(fullAdapter);
     }
 
     private void fetchAll() {
-        new Thread(new Runnable() {
-            @Override
-            public void run() {
-                final long now = System.currentTimeMillis();
-                final ListAdapter fullAdapter = cacheManager.getFullAdapter();
-                final long time = System.currentTimeMillis() - now;
-                runOnUiThread(new Runnable() {
-                    @Override
-                    public void run() {
-                        log("Read all " + time + "ms, count = " + fullAdapter.getCount());
-                        listView.setAdapter(fullAdapter);
-                    }
-                });
-            }
-        }).start();
+        final long now = System.currentTimeMillis();
+        final ListAdapter fullAdapter = cacheManager.getFullAdapter();
+        final long time = System.currentTimeMillis() - now;
+        log("Read all " + time + "ms, count = " + fullAdapter.getCount());
+        listView.setAdapter(fullAdapter);
     }
 
     ProgressDialog dialog;

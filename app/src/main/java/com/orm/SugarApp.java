@@ -9,7 +9,7 @@ public class SugarApp extends Application {
     @Override
     public void onCreate() {
         super.onCreate();
-
+        SugarContext.init(this);
     }
 
     @Override

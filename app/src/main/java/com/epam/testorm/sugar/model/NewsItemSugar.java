@@ -19,12 +19,12 @@ public class NewsItemSugar extends SugarRecord {
     private AuthorSugar author;
     @Expose
     @Table
-    private MediaItemSugar link;
+    private String link;
 
     public NewsItemSugar() {
     }
 
-    public NewsItemSugar(AuthorSugar author, ContentSugar content, long timestamp, MediaItemSugar link) {
+    public NewsItemSugar(AuthorSugar author, ContentSugar content, long timestamp, String link) {
         this.author = author;
         this.content = content;
         this.timestamp = timestamp;
@@ -56,11 +56,11 @@ public class NewsItemSugar extends SugarRecord {
         this.timestamp = timestamp;
     }
 
-    public MediaItemSugar getLink() {
+    public String getLink() {
         return link;
     }
 
-    public void setLink(MediaItemSugar link) {
+    public void setLink(String link) {
         this.link = link;
     }
 

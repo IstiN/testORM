@@ -13,12 +13,12 @@ public class NewsItemRealm extends RealmObject {
     @PrimaryKey
     private long timestamp;
     private AuthorRealm author;
-    private MediaItemRealm link;
+    private String link;
 
     public NewsItemRealm() {
     }
 
-    public NewsItemRealm(AuthorRealm author, ContentRealm content, long timestamp, MediaItemRealm link) {
+    public NewsItemRealm(AuthorRealm author, ContentRealm content, long timestamp, String link) {
         this.author = author;
         this.content = content;
         this.timestamp = timestamp;
@@ -57,11 +57,11 @@ public class NewsItemRealm extends RealmObject {
         this.timestamp = timestamp;
     }
 
-    public MediaItemRealm getLink() {
+    public String getLink() {
         return link;
     }
 
-    public void setLink(MediaItemRealm link) {
+    public void setLink(String link) {
         this.link = link;
     }
 

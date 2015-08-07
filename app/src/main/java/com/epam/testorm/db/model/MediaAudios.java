@@ -6,16 +6,14 @@ import com.epam.testorm.db.annotation.dbLong;
 /**
  * Created by Mikhail_Ivanou on 8/4/2015.
  */
-public class MediaAudios implements ICache {
+public class MediaAudios extends MediaItemDb {
 
     @Override
     public String getTableName() {
         return "mediaAudios";
     }
 
-    @dbLong
-    public static String newsId = "newsId";
+
     
-    @dbLong
-    public static String itemId = "itemId";
+
 }

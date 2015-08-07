@@ -10,14 +10,14 @@ public class AuthorRealm extends RealmObject {
     private String network;
     private String id;
     private String displayName;
-    private MediaItemRealm avatar;
-    private MediaItemRealm profile;
+    private String avatar;
+    private String profile;
     private long ref;
 
     public AuthorRealm() {
     }
 
-    public AuthorRealm(String network, String id, String displayName, MediaItemRealm avatar, MediaItemRealm profile, long ref) {
+    public AuthorRealm(String network, String id, String displayName, String avatar, String profile, long ref) {
         this.network = network;
         this.id = id;
         this.displayName = displayName;
@@ -38,11 +38,11 @@ public class AuthorRealm extends RealmObject {
         return displayName;
     }
 
-    public MediaItemRealm getAvatar() {
+    public String getAvatar() {
         return avatar;
     }
 
-    public MediaItemRealm getProfile() {
+    public String getProfile() {
         return profile;
     }
 
@@ -62,11 +62,11 @@ public class AuthorRealm extends RealmObject {
         this.displayName = displayName;
     }
 
-    public void setAvatar(MediaItemRealm avatar) {
+    public void setAvatar(String avatar) {
         this.avatar = avatar;
     }
 
-    public void setProfile(MediaItemRealm profile) {
+    public void setProfile(String profile) {
         this.profile = profile;
     }
 

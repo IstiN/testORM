@@ -21,16 +21,16 @@ public class AuthorSugar extends SugarRecord {
     @Expose
     private String displayName;
     @Expose
-    private MediaItemSugar avatar;
+    private String avatar;
     @Expose
-    private MediaItemSugar profile;
+    private String profile;
     @Expose
     private long ref;
 
     public AuthorSugar() {
     }
 
-    public AuthorSugar(String network, String id, String displayName, MediaItemSugar avatar, MediaItemSugar profile, long ref) {
+    public AuthorSugar(String network, String id, String displayName, String avatar, String profile, long ref) {
         this.network = network;
         this.userId = id;
         this.displayName = displayName;
@@ -51,11 +51,11 @@ public class AuthorSugar extends SugarRecord {
         return displayName;
     }
 
-    public MediaItemSugar getAvatar() {
+    public String getAvatar() {
         return avatar;
     }
 
-    public MediaItemSugar getProfile() {
+    public String getProfile() {
         return profile;
     }
 
@@ -75,11 +75,11 @@ public class AuthorSugar extends SugarRecord {
         this.displayName = displayName;
     }
 
-    public void setAvatar(MediaItemSugar avatar) {
+    public void setAvatar(String avatar) {
         this.avatar = avatar;
     }
 
-    public void setProfile(MediaItemSugar profile) {
+    public void setProfile(String profile) {
         this.profile = profile;
     }
 

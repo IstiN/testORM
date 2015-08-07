@@ -17,10 +17,12 @@ import com.epam.testorm.gson.Media;
 import com.epam.testorm.gson.MediaItem;
 import com.epam.testorm.gson.StreamDetails;
 import com.epam.testorm.realm.model.AuthorRealm;
+import com.epam.testorm.realm.model.BaseRealmResponse;
 import com.epam.testorm.realm.model.ContentRealm;
 import com.epam.testorm.realm.model.MediaItemRealm;
 import com.epam.testorm.realm.model.MediaRealm;
 import com.epam.testorm.realm.model.NewsItemRealm;
+import com.epam.testorm.sugar.model.BaseSugarResponse;
 import com.google.gson.ExclusionStrategy;
 import com.google.gson.FieldAttributes;
 import com.google.gson.Gson;
@@ -31,10 +33,6 @@ import com.google.gson.JsonObject;
 import com.google.gson.JsonParser;
 import com.google.gson.reflect.TypeToken;
 import com.nostra13.universalimageloader.core.ImageLoader;
-
-import org.json.JSONArray;
-import org.json.JSONException;
-import org.json.JSONObject;
 
 import java.lang.reflect.Type;
 import java.util.ArrayList;
@@ -63,14 +61,11 @@ public class RealmManager implements ICacheManager {
 
     @Override
     public void processFeed(String feed) {
-
         Realm realm = Realm.getDefaultInstance();
-//      processWithJSON(feed, realm);
-//      processWithGson(feed, realm);
-        processWithGson2(feed, realm);  //manual
-
+        processManual(feed, realm);  //manual
     }
 
+    //doesn't work as we need to simplify model
     private void processWithGson(String feed, Realm realm) {
         Gson gson = new GsonBuilder()
                 .setExclusionStrategies(new ExclusionStrategy() {
@@ -85,35 +80,15 @@ public class RealmManager implements ICacheManager {
                     }
                 })
                 .create();
-        JsonElement json = new JsonParser().parse(feed);
-        JsonObject asJsonObject = json.getAsJsonObject();
-        JsonObject data = asJsonObject.getAsJsonObject("data");
-        JsonArray updates = data.getAsJsonArray("updates");
-        Type type = new TypeToken<List<NewsItemRealm>>() {
-        }.getType();
-        List<NewsItemRealm> streams = gson.fromJson(updates, type);
+        BaseRealmResponse streamDetails = gson.fromJson(feed, BaseRealmResponse.class);
+        List<NewsItemRealm> streams = streamDetails.getData().getItems();
         realm.beginTransaction();
         realm.clear(NewsItemRealm.class);
         realm.copyToRealmOrUpdate(streams);
         realm.commitTransaction();
     }
 
-    private void processWithJSON(String feed, Realm realm) {
-        JSONArray result = null;
-        try {
-            JSONObject main = new JSONObject(feed);
-            JSONObject data = main.getJSONObject("data");
-            result = data.getJSONArray("updates");
-        } catch (JSONException e) {
-            e.printStackTrace();
-        }
-        realm.beginTransaction();
-        realm.clear(NewsItemRealm.class);
-        realm.createOrUpdateAllFromJson(NewsItemRealm.class, result);
-        realm.commitTransaction();
-    }
-
-    private void processWithGson2(String feed, Realm realm) {
+    private void processManual(String feed, Realm realm) {
         Gson gson = new Gson();
         BaseResponse streamDetails = gson.fromJson(feed, BaseResponse.class);
         List<StreamDetails> streams = streamDetails.getData().getItems();
@@ -131,23 +106,15 @@ public class RealmManager implements ICacheManager {
     private NewsItemRealm processItem(StreamDetails item) {
         NewsItemRealm newsItem = new NewsItemRealm();
         newsItem.setTimestamp(item.getTimestamp());
-        MediaItemRealm link = new MediaItemRealm();
-        link.setUrl(item.getLink());
-        newsItem.setLink(link);
+        newsItem.setLink(item.getLink());
 
         AuthorRealm author = new AuthorRealm();
         author.setId(item.getAuthor().getId());
         author.setRef(item.getAuthor().getRef());
         author.setNetwork(item.getAuthor().getNetwork());
         author.setDisplayName(item.getAuthor().getDisplayName());
-
-        MediaItemRealm avatar = new MediaItemRealm();
-        avatar.setUrl(checkNull(item.getAuthor().getAvatar()));
-        author.setAvatar(avatar);
-
-        MediaItemRealm profile = new MediaItemRealm();
-        profile.setUrl(checkNull(item.getAuthor().getProfileUrl()));
-        author.setProfile(profile);
+        author.setAvatar(checkNull(item.getAuthor().getAvatar()));
+        author.setProfile(checkNull(item.getAuthor().getProfileUrl()));
         newsItem.setAuthor(author);
 
         ContentRealm content = new ContentRealm();
@@ -183,23 +150,16 @@ public class RealmManager implements ICacheManager {
                 media.setUrl(checkNull(audio.getUrl()));
                 media.setDescription(checkNull(audio.getDescription()));
                 if (audio.getImage() != null) {
-                    MediaItemRealm image = new MediaItemRealm();
-                    image.setTitle(checkNull(audio.getImage().getTitle()));
-                    image.setUrl(checkNull(audio.getImage().getUrl()));
-                    media.setImage(image);
+                    media.setImage(checkNull(audio.getImage().getUrl()));
                 }
                 if (audio.getThumbnailUrl() != null) {
-                    MediaItemRealm image = new MediaItemRealm();
-                    image.setTitle(checkNull(audio.getThumbnailUrl().getTitle()));
-                    image.setUrl(checkNull(audio.getThumbnailUrl().getUrl()));
-                    media.setImage(image);
+                    media.setImage(checkNull(audio.getThumbnailUrl().getUrl()));
                 }
                 audiosRealmList.add(media);
             }
         }
         return audiosRealmList;
     }
-
 
     @Override
     public ListAdapter getFullAdapter() {
@@ -255,10 +215,10 @@ public class RealmManager implements ICacheManager {
                 posterTitle = photos.get(0).getTitle();
                 mediaCount = photos.size();
             } else if (urls != null && urls.size() > 0 && urls.get(0).getImage() != null) {
-                posterUrl = urls.get(0).getImage().getUrl();
+                posterUrl = urls.get(0).getImage();
                 posterTitle = urls.get(0).getUrl();
             } else if (videos != null && videos.size() > 0 && videos.get(0).getThumbnail() != null) {
-                posterUrl = videos.get(0).getThumbnail().getUrl();
+                posterUrl = videos.get(0).getThumbnail();
                 posterTitle = videos.get(0).getDescription();
             }
             if (urls != null && urls.size() > 0) {
@@ -270,15 +230,13 @@ public class RealmManager implements ICacheManager {
         }
         ImageLoader.getInstance().displayImage(posterUrl, posterView);
         ImageView avatarView = (ImageView) convertView.findViewById(R.id.avatar);
-        ImageLoader.getInstance().displayImage(channel.getAuthor().getAvatar().getUrl(), avatarView);
+        ImageLoader.getInstance().displayImage(channel.getAuthor().getAvatar(), avatarView);
         setText(convertView, R.id.title, channel.getAuthor().getDisplayName());
         setText(convertView, R.id.desc, StringUtils.isEmpty(channel.getContent().getTitle()) ? channel.getContent().getDescription() : channel.getContent().getTitle());
 
         setText(convertView, R.id.videoUrl, posterTitle);
         setText(convertView, R.id.videoKey, String.valueOf(mediaCount));
         setText(convertView, R.id.entitlements, channel.getContent().getComment());
-
-
     }
 
     private void setText(View view, int id, String value) {
@@ -290,7 +248,5 @@ public class RealmManager implements ICacheManager {
             number.setVisibility(View.GONE);
         }
     }
-
-
 
 }

@@ -1,6 +1,7 @@
 package com.epam.testorm.db.model;
 
 import com.epam.testorm.db.ICache;
+import com.epam.testorm.db.annotation.dbLong;
 import com.epam.testorm.db.annotation.dbString;
 
 /**
@@ -26,8 +27,12 @@ public class MediaItemDb implements ICache {
     @dbString
     public static String DESCRIPTION = "description";
 
+    @dbLong
+    public static String CONTENT_ID = "contentId";
+
+
     @Override
     public String getTableName() {
-        return "mediaItem";
+        return null;
     }
 }
