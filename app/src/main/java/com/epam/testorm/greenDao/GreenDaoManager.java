@@ -38,7 +38,9 @@ import com.google.gson.Gson;
 import com.nostra13.universalimageloader.core.ImageLoader;
 
 import java.util.ArrayList;
+import java.util.HashSet;
 import java.util.List;
+import java.util.Set;
 
 import de.greenrobot.dao.query.QueryBuilder;
 
@@ -190,8 +192,6 @@ public class GreenDaoManager implements ICacheManager {
 
     @Override
     public ListAdapter getFilteredAdapter() {
-        QueryBuilder.LOG_SQL = true;
-        QueryBuilder.LOG_VALUES = true;
         QueryBuilder<Author> authorQueryBuilder = mDaoSession.getAuthorDao().queryBuilder();
         authorQueryBuilder.whereOr(AuthorDao.Properties.DisplayName.eq("AdMe.ru"), AuthorDao.Properties.DisplayName.eq("Lenta.Ru"));
         List<Author> list = authorQueryBuilder.build().list();
@@ -206,8 +206,14 @@ public class GreenDaoManager implements ICacheManager {
 
     @Override
     public ListAdapter getImagesOnlyAdapter() {
-        List<News> newses = mDaoSession.getNewsDao().loadAll();
-        return createAdapter(newses);
+        List<Images> images = mDaoSession.getImagesDao().loadAll();
+        Set<String> ids = new HashSet<>();
+        for (Images item : images) {
+            ids.add(String.valueOf(item.getContentId()));
+        }
+        QueryBuilder<News> newsQueryBuilder = mDaoSession.getNewsDao().queryBuilder();
+        newsQueryBuilder.where(NewsDao.Properties.ContentId.in(ids));
+        return createAdapter(newsQueryBuilder.list());
     }
 
     @NonNull
