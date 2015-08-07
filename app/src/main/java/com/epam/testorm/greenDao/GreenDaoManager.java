@@ -193,15 +193,14 @@ public class GreenDaoManager implements ICacheManager {
         QueryBuilder.LOG_SQL = true;
         QueryBuilder.LOG_VALUES = true;
         QueryBuilder<Author> authorQueryBuilder = mDaoSession.getAuthorDao().queryBuilder();
-        authorQueryBuilder.or(AuthorDao.Properties.DisplayName.eq("Lenta.Ru"),AuthorDao.Properties.DisplayName.eq("AdMe.Ru"));
+        authorQueryBuilder.whereOr(AuthorDao.Properties.DisplayName.eq("AdMe.ru"), AuthorDao.Properties.DisplayName.eq("Lenta.Ru"));
         List<Author> list = authorQueryBuilder.build().list();
-        List<Long> ids = new ArrayList<>();
+        List<String> ids = new ArrayList<>();
         for (Author item : list) {
-            ids.add(item.getId());
+            ids.add(String.valueOf(item.getId()));
         }
-        String queryParam = "\"" + TextUtils.join("\",\"", ids) + "\"";
         QueryBuilder<News> newsQueryBuilder = mDaoSession.getNewsDao().queryBuilder();
-        newsQueryBuilder.where(NewsDao.Properties.AuthorId.in(queryParam));
+        newsQueryBuilder.where(NewsDao.Properties.AuthorId.in(ids));
         return createAdapter(newsQueryBuilder.list());
     }
 
